@@ -150,7 +150,6 @@ RUN cd /opt && \
 	ln -s /opt/coverage_sampler/csa /usr/bin && \
 	cd /
 
-
-RUN mkdir /SCRATCH
-WORKDIR /SCRATCH
-CMD ["bash"]
+################## UCT Hex specific ###########################
+RUN mkdir -p /researchdata/fhgfs
+RUN mkdir -p /scratch/DB/bio/Tychus
