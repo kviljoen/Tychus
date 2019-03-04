@@ -22,55 +22,7 @@
  * SOFTWARE.
  */
 
-//General configuation variables
-params.help = ""
-params.pwd = "$PWD"
-params.output = "tychus_alignment_output"
-params.work_dir = "$baseDir/temporary_files"
-params.read_pairs = "$baseDir/tutorial/raw_sequence_data/*_R{1,2}_001.fq.gz"
-params.genome = "$baseDir/tutorial/reference/EcoliK-12MG1655.fa"
-params.amr_db = ""
-params.annot_db = ""
-params.vf_db = ""
-params.plasmid_db = ""
-params.draft = ""
-params.out_dir = "$baseDir/" + params.output
-params.threads = 1
-
-threads = params.threads
-
-// Trimmomatic configuration variables
-params.leading = 3
-params.trailing = 3
-params.slidingwindow = "4:15"
-params.minlen = 36
-params.adapters = "TruSeq3-PE.fa"
-
-leading = params.leading
-trailing = params.trailing
-slidingwindow = params.slidingwindow
-minlen = params.minlen
-adapters = params.adapters
-
-// kSNP3 configuration variables
-params.ML = ""
-params.NJ = ""
-params.min_frac = 0.75
-
-ML = params.ML
-NJ = params.NJ
-min_frac = params.min_frac
-
-// Figtree configuration variables
-params.PNG = ""
-params.JPEG = ""
-params.PDF = ""
-params.SVG = ""
-
-PNG = params.PNG
-JPEG = params.JPEG
-PDF = params.PDF
-SVG = params.SVG
+//General configuation variables moved to nextflow.config
 
 // Display help menu
 if(params.help) {
