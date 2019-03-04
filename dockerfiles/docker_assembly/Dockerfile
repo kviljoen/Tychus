@@ -155,7 +155,6 @@ RUN wget -N ftp://ftp.ncbi.nih.gov/toolbox/ncbi_tools/converters/by_program/tbl2
 	cd /
 	
 	
-
-RUN mkdir /SCRATCH
-WORKDIR /SCRATCH
-CMD ["bash"]	
+################## UCT Hex specific ###########################
+RUN mkdir -p /researchdata/fhgfs
+RUN mkdir -p /scratch/DB/bio/Tychus
