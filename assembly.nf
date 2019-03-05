@@ -324,5 +324,5 @@ workflow.onComplete {
   	log.info "Command Line:		$workflow.commandLine"
 	log.info "Container:		$workflow.container"
 	log.info "Duration:		$workflow.duration"
-	log.info "Output Directory:	$params.out_dir"
+	log.info "Output Directory:	$params.assembly_out_dir"
 }
