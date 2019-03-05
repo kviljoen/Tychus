@@ -36,7 +36,7 @@ if(params.help) {
 	log.info 'General Options: '
 	log.info '    --read_pairs      DIR		Directory of paired FASTQ files'
 	log.info '    --threads         INT		Number of threads to use for each process'
-	log.info '    --output          DIR		Directory to write output files to'
+	log.info '    --assembly_output          DIR		Directory to write output files to'
 	log.info ''
 	log.info 'Trimmomatic Options: '
 	log.info '    --leading         INT		Remove leading low quality or N bases'
@@ -65,7 +65,7 @@ Channel
  * Remove adapter sequences and low quality base pairs with Trimmomatic
  */
 process RunQC {
-	publishDir "${params.out_dir}/PreProcessing", mode: "copy"
+	publishDir "${params.assembly_out_dir}/PreProcessing", mode: "copy"
 
 	tag { dataset_id }
 
@@ -108,7 +108,7 @@ process IdentifyBestKmer {
  * Build assembly with Abyss
  */
 process BuildAbyssAssembly {
-	publishDir "${params.out_dir}/AbyssContigs", mode: "copy"
+	publishDir "${params.assembly_out_dir}/AbyssContigs", mode: "copy"
 
 	tag { dataset_id }
 
@@ -132,7 +132,7 @@ process BuildAbyssAssembly {
  * Build assembly with Velvet
  */
 process BuildVelvetAssembly {
-	publishDir "${params.out_dir}/VelvetContigs", mode: "copy"
+	publishDir "${params.assembly_out_dir}/VelvetContigs", mode: "copy"
 
 	tag { dataset_id }
 
@@ -158,7 +158,7 @@ process BuildVelvetAssembly {
  * Build assembly with SPAdes
  */
 process BuildSpadesAssembly {
-	publishDir "${params.out_dir}/SPadesContigs", mode: "copy"
+	publishDir "${params.assembly_out_dir}/SPadesContigs", mode: "copy"
 	
 	tag { dataset_id }
 
@@ -178,7 +178,7 @@ process BuildSpadesAssembly {
  * Build assembly with IDBA-UD
  */
 process BuildIDBAAssembly {
-	publishDir "${params.out_dir}/IDBAContigs", mode: "copy"
+	publishDir "${params.assembly_out_dir}/IDBAContigs", mode: "copy"
 
 	tag { dataset_id }
 
@@ -220,7 +220,7 @@ abyss_assembly_results.concat(
  * Integrate contigs produced from each assembler with CISA
  */
 process IntegrateContigs {
-	publishDir "${params.out_dir}/IntegratedContigs", mode: "copy"
+	publishDir "${params.assembly_out_dir}/IntegratedContigs", mode: "copy"
 
 	tag { dataset_id }
 
@@ -257,7 +257,7 @@ process IntegrateContigs {
  * Annotate the CISA integrated contigs with Prokka
  */
 process AnnotateContigs {
-	publishDir "${params.out_dir}/AnnotatedContigs", mode: "copy"
+	publishDir "${params.assembly_out_dir}/AnnotatedContigs", mode: "copy"
 
 	tag { dataset_id }
 
@@ -294,7 +294,7 @@ abyss_assembly_quast_contigs.concat(
  * Evaluate ALL assemblies with QUAST
  */
 process EvaluateAssemblies {
-	publishDir "${params.out_dir}/AssemblyReport", mode: "move"
+	publishDir "${params.assembly_out_dir}/AssemblyReport", mode: "move"
 
 	tag { dataset_id }
 
