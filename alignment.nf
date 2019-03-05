@@ -40,7 +40,7 @@ if(params.help) {
 	log.info '    --plasmid_db      FILE		Path to the FASTA formatted plasmid database'
 	log.info '    --draft           FILE		Path to the FASTA formatted draft databases'
 	log.info '    --threads         INT		Number of threads to use for each process'
-	log.info '    --out_dir         DIR		Directory to write output files to'
+	log.info '    --alignment_out_dir         DIR		Directory to write output files to'
 	log.info ''
 	log.info 'Trimmomatic Options: '
 	log.info '    --leading         INT		Remove leading low quality or N bases'
@@ -126,7 +126,7 @@ process BuildGenomeIndex {
  * Remove adapter sequences and low quality base pairs with Trimmomatic
  */
 process RunQC {
-        publishDir "${params.out_dir}/Preprocessing", mode: "copy"
+        publishDir "${params.alignment_out_dir}/Preprocessing", mode: "copy"
 
         tag { dataset_id }
 
@@ -165,7 +165,7 @@ if( params.amr_db ) {
          * Align reads to resistance database with Bowtie2
          */
 	process AMRAlignment {
-        	publishDir "${params.out_dir}/Alignment", mode: "move", pattern: "*.bam"
+        	publishDir "${params.alignment_out_dir}/Alignment", mode: "move", pattern: "*.bam"
 
         	tag { dataset_id }
 
@@ -184,7 +184,7 @@ if( params.amr_db ) {
 	}
 
 	process AMRResistome {
-        	publishDir "${params.out_dir}/Resistome", mode: "move"
+        	publishDir "${params.alignment_out_dir}/Resistome", mode: "move"
 
         	tag { dataset_id }
 
@@ -222,7 +222,7 @@ if( params.vf_db ) {
          * Align reads to virulence factor database with Bowtie2
          */
 	process VFAlignment {
-        	publishDir "${params.out_dir}/Alignment", mode: "move", pattern: "*.bam"
+        	publishDir "${params.alignment_out_dir}/Alignment", mode: "move", pattern: "*.bam"
 
         	tag { dataset_id }
 
@@ -241,7 +241,7 @@ if( params.vf_db ) {
 	}
 
 	process VFResistome {
-        	publishDir "${params.out_dir}/Resistome", mode: "move"
+        	publishDir "${params.alignment_out_dir}/Resistome", mode: "move"
 
         	tag { dataset_id }
 
@@ -279,7 +279,7 @@ if( params.plasmid_db ) {
          * Align reads to plasmid database with Bowtie2
          */
 	process PlasmidAlignment {
-        	publishDir "${params.out_dir}/Alignment", mode: "move", pattern: "*.bam"
+        	publishDir "${params.alignment_out_dir}/Alignment", mode: "move", pattern: "*.bam"
 
         	tag { dataset_id }
 
@@ -298,7 +298,7 @@ if( params.plasmid_db ) {
 	}
 
 	process PlasmidResistome {
-        	publishDir "${params.out_dir}/Resistome", mode: "move"
+        	publishDir "${params.alignment_out_dir}/Resistome", mode: "move"
 
         	tag { dataset_id }
 
@@ -319,7 +319,7 @@ if( params.plasmid_db ) {
  * Align reads to reference genome with Bowtie2
  */
 process GenomeAlignment {
-	publishDir "${params.out_dir}/Alignment", mode: "copy", pattern: "*.bam"
+	publishDir "${params.alignment_out_dir}/Alignment", mode: "copy", pattern: "*.bam"
 
 	tag { dataset_id }
 
@@ -418,7 +418,7 @@ else {
  * Build phylogenies with kSNP3
  */
 process BuildPhylogenies {
-	publishDir "${params.out_dir}/SNPsAndPhylogenies", mode: "copy"
+	publishDir "${params.alignment_out_dir}/SNPsAndPhylogenies", mode: "copy"
 
 	tag { "ConfigurationFiles" }
 
@@ -466,7 +466,7 @@ phylogenetic_trees.flatten()
  * Build phylogenetic trees with Figtree
  */
 process ConvertNewickToPDF {
-	publishDir "${params.out_dir}/SNPsAndPhylogenies/TreeImages", mode: "move"
+	publishDir "${params.alignment_out_dir}/SNPsAndPhylogenies/TreeImages", mode: "move"
 
 	input:
 	file tree from trees
