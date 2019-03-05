@@ -76,7 +76,7 @@ process RunQC {
         set dataset_id, file("${dataset_id}_1P.fastq"), file("${dataset_id}_2P.fastq") into (abyss_read_pairs, velvet_read_pairs, spades_read_pairs, idba_read_pairs, kmer_genie_read_pairs)
 
         """
-        java -jar ${TRIMMOMATIC}/trimmomatic-0.36.jar PE -threads ${threads} $forward $reverse -baseout ${dataset_id} ILLUMINACLIP:Trimmomatic-0.36/adapters/${adapters}:2:30:10:3:TRUE LEADING:${leading} TRAILING:${trailing} SLIDINGWINDOW:${slidingwindow} MINLEN:${minlen}
+        java -jar ${TRIMMOMATIC}/trimmomatic-0.36.jar PE -threads ${params.threads} $forward $reverse -baseout ${dataset_id} ILLUMINACLIP:Trimmomatic-0.36/adapters/${params.adapters}:2:30:10:3:TRUE LEADING:${params.leading} TRAILING:${params.trailing} SLIDINGWINDOW:${params.slidingwindow} MINLEN:${params.minlen}
         mv ${dataset_id}_1P ${dataset_id}_1P.fastq
         mv ${dataset_id}_2P ${dataset_id}_2P.fastq
         """
@@ -98,7 +98,7 @@ process IdentifyBestKmer {
 	"""
 	echo $forward > ${dataset_id}_read_pair_list.txt
 	echo $reverse >> ${dataset_id}_read_pair_list.txt
-	kmergenie "${dataset_id}_read_pair_list.txt" -t ${threads} | tail -n 1 | awk '{print \$3}' > ${dataset_id}_best-k.txt
+	kmergenie "${dataset_id}_read_pair_list.txt" -t ${params.threads} | tail -n 1 | awk '{print \$3}' > ${dataset_id}_best-k.txt
 	cp $forward "${dataset_id}_forward_kg.fq"
 	cp $reverse "${dataset_id}_reverse_kg.fq"
 	"""
@@ -123,7 +123,7 @@ process BuildAbyssAssembly {
 	'''
 	#!/bin/sh
 	best_kmer=`cat !{best}`
-	abyss-pe k=$best_kmer name=abyss j=!{threads} in='!{forward} !{reverse}'
+	abyss-pe k=$best_kmer name=abyss j=!{params.threads} in='!{forward} !{reverse}'
         mv abyss-contigs.fa !{dataset_id}_abyss-contigs.fa
 	'''
 }
@@ -169,7 +169,7 @@ process BuildSpadesAssembly {
 	set dataset_id, file("${dataset_id}_spades-contigs.fa") into (spades_assembly_results, spades_assembly_quast_contigs)
 
 	"""
-	spades.py --pe1-1 ${forward} --pe1-2 ${reverse} -t ${threads} -o spades_output
+	spades.py --pe1-1 ${forward} --pe1-2 ${reverse} -t ${params.threads} -o spades_output
 	mv spades_output/contigs.fasta ${dataset_id}_spades-contigs.fa
 	"""
 }
@@ -190,7 +190,7 @@ process BuildIDBAAssembly {
 
 	"""
 	fq2fa --merge --filter ${forward} ${reverse} ${dataset_id}_idba-paired-contigs.fa
-	idba_ud -r ${dataset_id}_idba-paired-contigs.fa --num_threads ${threads} -o ${dataset_id}_idba_output
+	idba_ud -r ${dataset_id}_idba-paired-contigs.fa --num_threads ${params.threads} -o ${dataset_id}_idba_output
 	mv ${dataset_id}_idba_output/contig.fa ${dataset_id}_idba-contigs.fa	
 	"""
 }
@@ -272,9 +272,9 @@ process AnnotateContigs {
 	#!/bin/sh
 	if [ !{species} && !{genus} ]
 	then
-		prokka !{cisa_contigs} --genus !{genus} --species !{species} --centre tychus --prefix !{dataset_id} --cpus !{threads} --outdir annotations
+		prokka !{cisa_contigs} --genus !{params.genus} --species !{params.species} --centre tychus --prefix !{dataset_id} --cpus !{params.threads} --outdir annotations
 	else
-		prokka !{cisa_contigs} --prefix !{dataset_id} --cpus !{threads} --outdir annotations
+		prokka !{cisa_contigs} --prefix !{dataset_id} --cpus !{params.threads} --outdir annotations
 	fi
 	mv annotations/* .
 	'''
@@ -307,7 +307,7 @@ process EvaluateAssemblies {
 	shell:
 	'''
 	#!/bin/sh
-	quast.py !{quast_contigs[0]} !{quast_contigs[1]} !{quast_contigs[2]} !{quast_contigs[3]} !{quast_contigs[4]} --space-efficient --threads !{threads} -o output
+	quast.py !{quast_contigs[0]} !{quast_contigs[1]} !{quast_contigs[2]} !{quast_contigs[3]} !{quast_contigs[4]} --space-efficient --threads !{params.threads} -o output
         mkdir quast_output
         find output/ -maxdepth 2 -type f | xargs mv -t quast_output
         cd quast_output
