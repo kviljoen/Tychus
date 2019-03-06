@@ -36,7 +36,7 @@ if(params.help) {
 	log.info 'General Options: '
 	log.info '    --read_pairs      DIR		Directory of paired FASTQ files'
 	log.info '    --threads         INT		Number of threads to use for each process'
-	log.info '    --assembly_output          DIR		Directory to write output files to'
+	log.info '    --assembly_out_dir          DIR		Directory to write output files to'
 	log.info ''
 	log.info 'Trimmomatic Options: '
 	log.info '    --leading         INT		Remove leading low quality or N bases'
