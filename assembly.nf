@@ -270,11 +270,11 @@ process AnnotateContigs {
 	shell:
 	'''
 	#!/bin/sh
-	if [ !{species} && !{genus} ]
+	if [ ${params.species} && ${params.genus} ]
 	then
-		prokka !{cisa_contigs} --genus !{params.genus} --species !{params.species} --centre tychus --prefix !{dataset_id} --cpus !{params.threads} --outdir annotations
+		prokka ${cisa_contigs} --genus ${params.genus} --species ${params.species} --centre tychus --prefix ${dataset_id} --cpus ${params.threads} --outdir annotations
 	else
-		prokka !{cisa_contigs} --prefix !{dataset_id} --cpus !{params.threads} --outdir annotations
+		prokka ${cisa_contigs} --prefix ${dataset_id} --cpus ${params.threads} --outdir annotations
 	fi
 	mv annotations/* .
 	'''
