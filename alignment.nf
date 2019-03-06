@@ -118,7 +118,7 @@ process BuildGenomeIndex {
 	file 'genome.index*' into genome_index
 
 	"""
-	bowtie2-build $genome genome.index --threads ${threads}
+	bowtie2-build $genome genome.index --threads ${params.threads}
 	"""
 }
 
@@ -137,7 +137,7 @@ process RunQC {
         set dataset_id, file("${dataset_id}_1P.fastq"), file("${dataset_id}_2P.fastq") into (amr_read_pairs, plasmid_read_pairs, vf_read_pairs, genome_read_pairs)
 
         """
-        java -jar ${TRIMMOMATIC}/trimmomatic-0.36.jar PE -threads ${threads} $forward $reverse -baseout ${dataset_id} ILLUMINACLIP:Trimmomatic-0.36/adapters/${adapters}:2:30:10:3:TRUE LEADING:${leading} TRAILING:${trailing} SLIDINGWINDOW:${slidingwindow} MINLEN:${minlen}
+        java -jar ${TRIMMOMATIC}/trimmomatic-0.36.jar PE -threads ${params.threads} $forward $reverse -baseout ${dataset_id} ILLUMINACLIP:Trimmomatic-0.36/adapters/${params.adapters}:2:30:10:3:TRUE LEADING:${params.leading} TRAILING:${params.trailing} SLIDINGWINDOW:${params.slidingwindow} MINLEN:${params.minlen}
         mv ${dataset_id}_1P ${dataset_id}_1P.fastq
         mv ${dataset_id}_2P ${dataset_id}_2P.fastq
         """
@@ -157,7 +157,7 @@ if( params.amr_db ) {
         	file 'amr.index*' into amr_index
 
         	"""
-        	bowtie2-build $amr_db amr.index --threads ${threads}
+        	bowtie2-build $amr_db amr.index --threads ${params.threads}
 		"""
 	}
 
@@ -178,8 +178,8 @@ if( params.amr_db ) {
         	set dataset_id, file("${dataset_id}_amr_alignment.bam") into amr_bam_files
 
         	"""
-        	bowtie2 -p ${threads} -x amr.index -1 $forward -2 $reverse -S ${dataset_id}_amr_alignment.sam
-        	samtools view -bS ${dataset_id}_amr_alignment.sam | samtools sort -@ ${threads} -o ${dataset_id}_amr_alignment.bam
+        	bowtie2 -p ${params.threads} -x amr.index -1 $forward -2 $reverse -S ${dataset_id}_amr_alignment.sam
+        	samtools view -bS ${dataset_id}_amr_alignment.sam | samtools sort -@ ${params.threads} -o ${dataset_id}_amr_alignment.bam
         	"""
 	}
 
@@ -196,7 +196,7 @@ if( params.amr_db ) {
         	set dataset_id, file("${dataset_id}_amr_gene_resistome.tsv") into amr_gene_level
 
         	"""
-		csa -ref_fp ${vf_db} -sam_fp ${vf_sam} -min 5 -max 100 -skip 5 -t 0 -samples 1 -out_fp "${dataset_id}_amr_gene_resistome.tsv"
+		csa -ref_fp ${params.vf_db} -sam_fp ${params.vf_sam} -min 5 -max 100 -skip 5 -t 0 -samples 1 -out_fp "${dataset_id}_amr_gene_resistome.tsv"
         	"""
 	}
 }
@@ -215,7 +215,7 @@ if( params.vf_db ) {
         	file 'vf.index*' into vf_index
 
         	"""
-        	bowtie2-build $vf_db vf.index --threads ${threads}
+        	bowtie2-build $vf_db vf.index --threads ${params.threads}
 		"""
 	}
 	/*
@@ -235,8 +235,8 @@ if( params.vf_db ) {
         	set dataset_id, file("${dataset_id}_vf_alignment.bam") into vf_bam_files
 
         	"""
-        	bowtie2 -p ${threads} -x vf.index -1 $forward -2 $reverse -S ${dataset_id}_vf_alignment.sam
-        	samtools view -bS ${dataset_id}_vf_alignment.sam | samtools sort -@ ${threads} -o ${dataset_id}_vf_alignment.bam
+        	bowtie2 -p ${params.threads} -x vf.index -1 $forward -2 $reverse -S ${dataset_id}_vf_alignment.sam
+        	samtools view -bS ${dataset_id}_vf_alignment.sam | samtools sort -@ ${params.threads} -o ${dataset_id}_vf_alignment.bam
         	"""
 	}
 
@@ -272,7 +272,7 @@ if( params.plasmid_db ) {
         	file 'plasmid.index*' into plasmid_index
 
         	"""
-        	bowtie2-build $plasmid_db plasmid.index --threads ${threads}
+        	bowtie2-build $plasmid_db plasmid.index --threads ${params.threads}
 		"""
 	}
 	/*
@@ -293,7 +293,7 @@ if( params.plasmid_db ) {
 
         	"""
         	bowtie2 -p ${threads} -x plasmid.index -1 $forward -2 $reverse -S ${dataset_id}_plasmid_alignment.sam
-        	samtools view -bS ${dataset_id}_plasmid_alignment.sam | samtools sort -@ ${threads} -o ${dataset_id}_plasmid_alignment.bam
+        	samtools view -bS ${dataset_id}_plasmid_alignment.sam | samtools sort -@ ${params.threads} -o ${dataset_id}_plasmid_alignment.bam
         	"""
 	}
 
@@ -332,8 +332,8 @@ process GenomeAlignment {
         set dataset_id, file("${dataset_id}_genome_alignment.bai") into genome_index_files
 
 	"""
-	bowtie2 -p ${threads} -x genome.index -1 $forward -2 $reverse -S ${dataset_id}_genome_alignment.sam
-	samtools view -bS ${dataset_id}_genome_alignment.sam | samtools sort -@ ${threads} -o ${dataset_id}_genome_alignment.bam
+	bowtie2 -p ${params.threads} -x genome.index -1 $forward -2 $reverse -S ${dataset_id}_genome_alignment.sam
+	samtools view -bS ${dataset_id}_genome_alignment.sam | samtools sort -@ ${params.threads} -o ${dataset_id}_genome_alignment.bam
         samtools index ${dataset_id}_genome_alignment.bam ${dataset_id}_genome_alignment.bai
 	"""
 }
