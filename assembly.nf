@@ -267,9 +267,7 @@ process AnnotateContigs {
 	output:
 	file("${dataset_id}.*") into prokka_annotations
 
-	shell:
-	'''
-	#!/bin/sh
+	"""
 	if [ ${params.species} && ${params.genus} ]
 	then
 		prokka ${cisa_contigs} --genus ${params.genus} --species ${params.species} --centre tychus --prefix ${dataset_id} --cpus ${params.threads} --outdir annotations
@@ -277,7 +275,7 @@ process AnnotateContigs {
 		prokka ${cisa_contigs} --prefix ${dataset_id} --cpus ${params.threads} --outdir annotations
 	fi
 	mv annotations/* .
-	'''
+	"""
 }
 
 abyss_assembly_quast_contigs.concat(
