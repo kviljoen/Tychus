@@ -94,10 +94,10 @@ if( params.plasmid_db ) {
         if( !plasmid_db.exists() ) exit 1, "Plasmid file could not be found: ${params.plasmid_db}"
 }
 
-if( params.annot_db) {
-	annot_db = file(params.annot_db)
-	if( !annot_db.exists() ) exit 1, "Annotation file could not be found: ${params.annot_db}"
-}
+//if( params.annot_db) {
+//	annot_db = file(params.annot_db)
+//	if( !annot_db.exists() ) exit 1, "Annotation file could not be found: ${params.annot_db}"
+//}
 
 if( params.draft ) {
         draft_path = params.draft.substring(0, params.draft.lastIndexOf("/"))
@@ -203,7 +203,7 @@ if( params.amr_db ) {
 
 if( params.vf_db ) {
 	/*
-         * Build resistance database index with Bowtie2
+         * Build virulence database index with Bowtie2
          */
 	process BuildVFIndex {
 		tag { "${vf_db.baseName}" }
@@ -258,22 +258,22 @@ if( params.vf_db ) {
 	}
 }
 
-if( params.plasmid_db ) {
+//if( params.plasmid_db ) { //KL: downloaded prebuilt from plsdb
 	/*
          * Build plasmid index with Bowtie2
          */
-	process BuildPlasmidIndex {
-		tag { "${plasmid_db.baseName}" }
+//	process BuildPlasmidIndex {
+//		tag { "${plasmid_db.baseName}" }
+//
+//		input:
+//       	file plasmid_db
+//
+//        	output:
+//        	file 'plasmid.index*' into plasmid_index
 
-		input:
-        	file plasmid_db
-
-        	output:
-        	file 'plasmid.index*' into plasmid_index
-
-        	"""
-        	bowtie2-build $plasmid_db plasmid.index --threads ${params.threads}
-		"""
+//        	"""
+//        	bowtie2-build $plasmid_db plasmid.index --threads ${params.threads}
+//		"""
 	}
 	/*
          * Align reads to plasmid database with Bowtie2
@@ -285,14 +285,14 @@ if( params.plasmid_db ) {
 
         	input:
         	set dataset_id, file(forward), file(reverse) from plasmid_read_pairs
-        	file index from plasmid_index.first()
+        	file plasmid_index from plasmid_db.first() //KL edit
 
         	output:
         	set dataset_id, file("${dataset_id}_plasmid_alignment.sam") into plasmid_sam_files
         	set dataset_id, file("${dataset_id}_plasmid_alignment.bam") into plasmid_bam_files
 
         	"""
-        	bowtie2 -p ${threads} -x plasmid.index -1 $forward -2 $reverse -S ${dataset_id}_plasmid_alignment.sam
+        	bowtie2 -p ${params.threads} -x $plasma_index -1 $forward -2 $reverse -S ${dataset_id}_plasmid_alignment.sam //KL edit
         	samtools view -bS ${dataset_id}_plasmid_alignment.sam | samtools sort -@ ${params.threads} -o ${dataset_id}_plasmid_alignment.bam
         	"""
 	}
