@@ -71,7 +71,7 @@ if(params.help) {
 Channel
         .fromFilePairs(params.read_pairs, flat: true)
 	.ifEmpty { exit 1, "Read pairs could not be found: ${params.read_pairs}" }
-        .into { trimmomatic_read_pairs }
+        .set { trimmomatic_read_pairs }
 
 // Validate user-inputs
 if( params.genome ) {
@@ -285,14 +285,14 @@ if( params.plasmid_db ) { //KL: downloaded prebuilt from plsdb
 
         	input:
         	set dataset_id, file(forward), file(reverse) from plasmid_read_pairs
-        	file plasmid_index from plasmid_db.first() //KL edit
+        	file plasmid_db //KL edit
 
         	output:
         	set dataset_id, file("${dataset_id}_plasmid_alignment.sam") into plasmid_sam_files
         	set dataset_id, file("${dataset_id}_plasmid_alignment.bam") into plasmid_bam_files
 
         	"""
-        	bowtie2 -p ${params.threads} -x $plasma_index -1 $forward -2 $reverse -S ${dataset_id}_plasmid_alignment.sam //KL edit
+        	bowtie2 -p ${params.threads} -x $plasma_db -1 $forward -2 $reverse -S ${dataset_id}_plasmid_alignment.sam //KL edit
         	samtools view -bS ${dataset_id}_plasmid_alignment.sam | samtools sort -@ ${params.threads} -o ${dataset_id}_plasmid_alignment.bam
         	"""
 	}
