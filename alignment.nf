@@ -285,7 +285,7 @@ if( params.plasmid_db ) { //KL: downloaded prebuilt from plsdb
 		
         	input:
         	set dataset_id, file(forward), file(reverse) from plasmid_read_pairs
-        	file index from plasmid_db.first()
+        	file index from plasmid_index.first()
 
         	output:
         	set dataset_id, file("${dataset_id}_plasmid_alignment.sam") into plasmid_sam_files
