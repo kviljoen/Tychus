@@ -344,7 +344,7 @@ process GenomeAlignment {
 process BuildConesnsusSequence {
 	tag { dataset_id }
 
-	publishDir "${params.out_dir}/Consensus", mode: "copy"
+	publishDir "${params.alignment_out_dir}/Consensus", mode: "copy"
 
 	input:
 	set dataset_id, file(bam) from genome_bam_files
