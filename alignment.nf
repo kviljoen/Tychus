@@ -274,7 +274,7 @@ if( params.vf_db ) {
 //        	"""
 //        	bowtie2-build $plasmid_db plasmid.index --threads ${params.threads}
 //		"""
-	}
+//	}
 	/*
          * Align reads to plasmid database with Bowtie2
          */
