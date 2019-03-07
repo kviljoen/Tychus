@@ -294,7 +294,7 @@ if( params.plasmid_db ) { //KL: downloaded prebuilt from plsdb
         	set dataset_id, file("${dataset_id}_plasmid_alignment.bam") into plasmid_bam_files
 
         	"""
-        	bowtie2 -p ${params.threads} -x $plasma_db -1 $forward -2 $reverse -S ${dataset_id}_plasmid_alignment.sam //KL edit
+        	bowtie2 -p ${params.threads} -x $plasmid_db -1 $forward -2 $reverse -S ${dataset_id}_plasmid_alignment.sam //KL edit
         	samtools view -bS ${dataset_id}_plasmid_alignment.sam | samtools sort -@ ${params.threads} -o ${dataset_id}_plasmid_alignment.bam
         	"""
 	}
