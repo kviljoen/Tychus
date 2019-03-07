@@ -196,7 +196,7 @@ if( params.amr_db ) {
         	set dataset_id, file("${dataset_id}_amr_gene_resistome.tsv") into amr_gene_level
 
         	"""
-		csa -ref_fp ${params.vf_db} -sam_fp ${params.vf_sam} -min 5 -max 100 -skip 5 -t 0 -samples 1 -out_fp "${dataset_id}_amr_gene_resistome.tsv"
+		csa -ref_fp ${amr_db} -sam_fp ${amr_sam} -min 5 -max 100 -skip 5 -t 0 -samples 1 -out_fp "${dataset_id}_amr_gene_resistome.tsv"
         	"""
 	}
 }
