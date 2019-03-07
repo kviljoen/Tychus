@@ -258,7 +258,7 @@ if( params.vf_db ) {
 	}
 }
 
-//if( params.plasmid_db ) { //KL: downloaded prebuilt from plsdb
+if( params.plasmid_db ) { //KL: downloaded prebuilt from plsdb
 	/*
          * Build plasmid index with Bowtie2
          */
