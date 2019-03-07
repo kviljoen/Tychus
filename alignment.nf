@@ -397,10 +397,10 @@ else {
 
 		storeDir 'temporary_files'
 		
-		ref_genome = file(params.genome)
+		//ref_genome = file(params.genome)
 		
 		input:
-		file genome from ref_genome
+		file genome
 
 		output:
 		file("genome_paths.txt") into genome_config
@@ -440,10 +440,10 @@ process BuildPhylogenies {
 	optimum_k=`grep "The optimum" Kchooser.report | tr -dc '0-9'`
 	cat !{kchooser_config} > in_list
 	cat !{ksnp3_config} >> in_list
-	if [ !{ML} && !{NJ} ]
+	if [ !{params.ML} && !{params.NJ} ]
 	then
 		${KSNP3}/kSNP3 -in in_list -outdir kSNP3_results -k ${optimum_k} -ML -NJ -core -min_frac !{min_frac} >> /dev/null
-	elif [ !{NJ} ]
+	elif [ !{params.NJ} ]
 	then
 		${KSNP3}/kSNP3 -in in_list -outdir kSNP3_results -k ${optimum_k} -NJ -core -min_frac !{min_frac} >> /dev/null
 	else
