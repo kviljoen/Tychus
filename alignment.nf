@@ -282,10 +282,12 @@ if( params.plasmid_db ) { //KL: downloaded prebuilt from plsdb
         	publishDir "${params.alignment_out_dir}/Alignment", mode: "move", pattern: "*.bam"
 
         	tag { dataset_id }
-
+		//indexed plasmid DB
+		plasmid_db = file(params.plasmid_db)
+		
         	input:
         	set dataset_id, file(forward), file(reverse) from plasmid_read_pairs
-        	file plasmid_db //KL edit
+        	file plasmid_db from plasmid_db//KL edit
 
         	output:
         	set dataset_id, file("${dataset_id}_plasmid_alignment.sam") into plasmid_sam_files
