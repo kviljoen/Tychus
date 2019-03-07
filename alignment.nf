@@ -396,9 +396,11 @@ else {
 		echo true
 
 		storeDir 'temporary_files'
-
+		
+		ref_genome = file(params.genome)
+		
 		input:
-		file genome
+		file genome from ref_genome
 
 		output:
 		file("genome_paths.txt") into genome_config
