@@ -442,12 +442,12 @@ process BuildPhylogenies {
 	cat !{ksnp3_config} >> in_list
 	if [ !{params.ML} && !{params.NJ} ]
 	then
-		${KSNP3}/kSNP3 -in in_list -outdir kSNP3_results -k ${optimum_k} -ML -NJ -core -min_frac !{min_frac} >> /dev/null
+		${KSNP3}/kSNP3 -in in_list -outdir kSNP3_results -k ${optimum_k} -ML -NJ -core -min_frac !{params.min_frac} >> /dev/null
 	elif [ !{params.NJ} ]
 	then
-		${KSNP3}/kSNP3 -in in_list -outdir kSNP3_results -k ${optimum_k} -NJ -core -min_frac !{min_frac} >> /dev/null
+		${KSNP3}/kSNP3 -in in_list -outdir kSNP3_results -k ${optimum_k} -NJ -core -min_frac !{params.min_frac} >> /dev/null
 	else
-		${KSNP3}/kSNP3 -in in_list -outdir kSNP3_results -k ${optimum_k} -ML -core -min_frac !{min_frac} >> /dev/null
+		${KSNP3}/kSNP3 -in in_list -outdir kSNP3_results -k ${optimum_k} -ML -core -min_frac !{params.min_frac} >> /dev/null
 	fi
 	mkdir Trees
 	mkdir SNPs
@@ -482,13 +482,13 @@ process ConvertNewickToPDF {
 	shell:
 	"""
 	#!/bin/sh
-        if [ ${PDF} ]
+        if [ ${params.PDF} ]
         then
                	java -jar ${FIGTREE}/figtree.jar -graphic PDF ${tree} ${base}.pdf
-        elif [ ${SVG} ]
+        elif [ ${params.SVG} ]
         then
                	java -jar ${FIGTREE}/figtree.jar -graphic SVG ${tree} ${base}.svg
-        elif [ ${JPEG} ]
+        elif [ ${params.JPEG} ]
         then
                	java -jar ${FIGTREE}/figtree.jar -graphic JPEG ${tree} ${base}.jpg
         else
