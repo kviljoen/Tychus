@@ -105,8 +105,8 @@ RUN apt-get install -y \
 ################################################################################################
 RUN cd /opt && \
 	wget https://github.com/rambaut/figtree/releases/download/v1.4.4/FigTree_v1.4.4.tgz  && \
-	tar -zxvf FigTree_v1.4.4.tgz
-	cd FigTree_v1.4.4
+	tar -zxvf FigTree_v1.4.4.tgz && \
+	cd FigTree_v1.4.4 && \
 	chmod u+x figtree/lib/figtree.jar && \
 	cp -puv lib/figtree.jar /usr/local/bin/ && \
 	rm -rf FigTree_v1.4.4 && \
