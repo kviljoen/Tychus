@@ -20,7 +20,8 @@ RUN apt-get update && apt-get install -y \
         python \
 	tar \
 	zlib1g-dev \
-	libncurses5-dev
+	libncurses5-dev \
+	liblzma-dev
 	
 
 #################################################################################################
