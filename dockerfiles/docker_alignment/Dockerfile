@@ -4,6 +4,7 @@
 FROM ubuntu:16.04
 MAINTAINER Chris Dean <cdean11@rams.colostate.edu>
 
+ENV PATH="/usr/local/kSNP3/:${PATH}"
 
 #################################################################################################
 # Install core packages
