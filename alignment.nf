@@ -435,19 +435,19 @@ process BuildPhylogenies {
 	shell:
 	'''
 	#!/bin/sh
-	${KSNP3}/MakeFasta !{kchooser_config} MF.fasta > /dev/null
-	${KSNP3}/Kchooser MF.fasta > /dev/null
+	MakeFasta !{kchooser_config} MF.fasta > /dev/null
+	Kchooser MF.fasta > /dev/null
 	optimum_k=`grep "The optimum" Kchooser.report | tr -dc '0-9'`
 	cat !{kchooser_config} > in_list
 	cat !{ksnp3_config} >> in_list
-	if [ !{ML} && !{NJ} ]
+	if [ !{params.ML} && !{params.NJ} ]
 	then
-		${KSNP3}/kSNP3 -in in_list -outdir kSNP3_results -k ${optimum_k} -ML -NJ -core -min_frac !{min_frac} >> /dev/null
-	elif [ !{NJ} ]
+		kSNP3 -in in_list -outdir kSNP3_results -k ${optimum_k} -ML -NJ -core -min_frac !{params.min_frac} >> /dev/null
+	elif [ !{params.NJ} ]
 	then
-		${KSNP3}/kSNP3 -in in_list -outdir kSNP3_results -k ${optimum_k} -NJ -core -min_frac !{min_frac} >> /dev/null
+		kSNP3 -in in_list -outdir kSNP3_results -k ${optimum_k} -NJ -core -min_frac !{params.min_frac} >> /dev/null
 	else
-		${KSNP3}/kSNP3 -in in_list -outdir kSNP3_results -k ${optimum_k} -ML -core -min_frac !{min_frac} >> /dev/null
+		kSNP3 -in in_list -outdir kSNP3_results -k ${optimum_k} -ML -core -min_frac !{params.min_frac} >> /dev/null
 	fi
 	mkdir Trees
 	mkdir SNPs
