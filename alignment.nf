@@ -118,7 +118,7 @@ process BuildGenomeIndex {
 	file 'genome.index*' into genome_index
 
 	"""
-	bowtie2-build $genome genome.index --threads ${params.threads}
+	bowtie2-build $genome genome.index --threads ${task.cpus}
 	"""
 }
 
@@ -137,7 +137,7 @@ process RunQC {
         set dataset_id, file("${dataset_id}_1P.fastq"), file("${dataset_id}_2P.fastq") into (amr_read_pairs, plasmid_read_pairs, vf_read_pairs, genome_read_pairs)
 
         """
-        java -jar ${TRIMMOMATIC}/trimmomatic-0.36.jar PE -threads ${params.threads} $forward $reverse -baseout ${dataset_id} ILLUMINACLIP:Trimmomatic-0.36/adapters/${params.adapters}:2:30:10:3:TRUE LEADING:${params.leading} TRAILING:${params.trailing} SLIDINGWINDOW:${params.slidingwindow} MINLEN:${params.minlen}
+        java -jar ${TRIMMOMATIC}/trimmomatic-0.36.jar PE -threads ${task.cpus} $forward $reverse -baseout ${dataset_id} ILLUMINACLIP:Trimmomatic-0.36/adapters/${params.adapters}:2:30:10:3:TRUE LEADING:${params.leading} TRAILING:${params.trailing} SLIDINGWINDOW:${params.slidingwindow} MINLEN:${params.minlen}
         mv ${dataset_id}_1P ${dataset_id}_1P.fastq
         mv ${dataset_id}_2P ${dataset_id}_2P.fastq
         """
@@ -157,7 +157,7 @@ if( params.amr_db ) {
         	file 'amr.index*' into amr_index
 
         	"""
-        	bowtie2-build $amr_db amr.index --threads ${params.threads}
+        	bowtie2-build $amr_db amr.index --threads ${task.cpus}
 		"""
 	}
 
@@ -178,8 +178,8 @@ if( params.amr_db ) {
         	set dataset_id, file("${dataset_id}_amr_alignment.bam") into amr_bam_files
 
         	"""
-        	bowtie2 -p ${params.threads} -x amr.index -1 $forward -2 $reverse -S ${dataset_id}_amr_alignment.sam
-        	samtools view -bS ${dataset_id}_amr_alignment.sam | samtools sort -@ ${params.threads} -o ${dataset_id}_amr_alignment.bam
+        	bowtie2 -p ${task.cpus} -x amr.index -1 $forward -2 $reverse -S ${dataset_id}_amr_alignment.sam
+        	samtools view -bS ${dataset_id}_amr_alignment.sam | samtools sort -@ ${task.cpus} -o ${dataset_id}_amr_alignment.bam
         	"""
 	}
 
@@ -215,7 +215,7 @@ if( params.vf_db ) {
         	file 'vf.index*' into vf_index
 
         	"""
-        	bowtie2-build $vf_db vf.index --threads ${params.threads}
+        	bowtie2-build $vf_db vf.index --threads ${task.cpus}
 		"""
 	}
 	/*
@@ -235,8 +235,8 @@ if( params.vf_db ) {
         	set dataset_id, file("${dataset_id}_vf_alignment.bam") into vf_bam_files
 
         	"""
-        	bowtie2 -p ${params.threads} -x vf.index -1 $forward -2 $reverse -S ${dataset_id}_vf_alignment.sam
-        	samtools view -bS ${dataset_id}_vf_alignment.sam | samtools sort -@ ${params.threads} -o ${dataset_id}_vf_alignment.bam
+        	bowtie2 -p ${task.cpus} -x vf.index -1 $forward -2 $reverse -S ${dataset_id}_vf_alignment.sam
+        	samtools view -bS ${dataset_id}_vf_alignment.sam | samtools sort -@ ${task.cpus} -o ${dataset_id}_vf_alignment.bam
         	"""
 	}
 
@@ -272,7 +272,7 @@ if( params.plasmid_db ) { //KL: downloaded prebuilt from plsdb
         	file 'plasmid.index*' into plasmid_index
 
         	"""
-        	bowtie2-build $plasmid_db plasmid.index --threads ${params.threads}
+        	bowtie2-build $plasmid_db plasmid.index --threads ${task.cpus}
 		"""
 	}
 	/*
@@ -292,8 +292,8 @@ if( params.plasmid_db ) { //KL: downloaded prebuilt from plsdb
         	set dataset_id, file("${dataset_id}_plasmid_alignment.bam") into plasmid_bam_files
 
         	"""
-        	bowtie2 -p ${params.threads} -x $index -1 $forward -2 $reverse -S ${dataset_id}_plasmid_alignment.sam //KL edit
-        	samtools view -bS ${dataset_id}_plasmid_alignment.sam | samtools sort -@ ${params.threads} -o ${dataset_id}_plasmid_alignment.bam
+        	bowtie2 -p ${task.cpus} -x $index -1 $forward -2 $reverse -S ${dataset_id}_plasmid_alignment.sam //KL edit
+        	samtools view -bS ${dataset_id}_plasmid_alignment.sam | samtools sort -@ ${task.cpus} -o ${dataset_id}_plasmid_alignment.bam
         	"""
 	}
 
@@ -332,8 +332,8 @@ process GenomeAlignment {
         set dataset_id, file("${dataset_id}_genome_alignment.bai") into genome_index_files
 
 	"""
-	bowtie2 -p ${params.threads} -x genome.index -1 $forward -2 $reverse -S ${dataset_id}_genome_alignment.sam
-	samtools view -bS ${dataset_id}_genome_alignment.sam | samtools sort -@ ${params.threads} -o ${dataset_id}_genome_alignment.bam
+	bowtie2 -p ${task.cpus} -x genome.index -1 $forward -2 $reverse -S ${dataset_id}_genome_alignment.sam
+	samtools view -bS ${dataset_id}_genome_alignment.sam | samtools sort -@ ${task.cpus} -o ${dataset_id}_genome_alignment.bam
         samtools index ${dataset_id}_genome_alignment.bam ${dataset_id}_genome_alignment.bai
 	"""
 }
@@ -435,19 +435,19 @@ process BuildPhylogenies {
 	shell:
 	'''
 	#!/bin/sh
-	MakeFasta !{kchooser_config} MF.fasta > /dev/null
-	Kchooser MF.fasta > /dev/null
+	MakeFasta !{kchooser_config} MF.fasta
+	Kchooser MF.fasta
 	optimum_k=`grep "The optimum" Kchooser.report | tr -dc '0-9'`
 	cat !{kchooser_config} > in_list
 	cat !{ksnp3_config} >> in_list
 	if [ !{params.ML} && !{params.NJ} ]
 	then
-		kSNP3 -in in_list -outdir kSNP3_results -k ${optimum_k} -ML -NJ -core -min_frac !{params.min_frac} >> /dev/null
+		kSNP3 -in in_list -outdir kSNP3_results -k \${optimum_k} -ML -NJ -core -min_frac !{params.min_frac} >> /dev/null
 	elif [ !{params.NJ} ]
 	then
-		kSNP3 -in in_list -outdir kSNP3_results -k ${optimum_k} -NJ -core -min_frac !{params.min_frac} >> /dev/null
+		kSNP3 -in in_list -outdir kSNP3_results -k \${optimum_k} -NJ -core -min_frac !{params.min_frac} >> /dev/null
 	else
-		kSNP3 -in in_list -outdir kSNP3_results -k ${optimum_k} -ML -core -min_frac !{params.min_frac} >> /dev/null
+		kSNP3 -in in_list -outdir kSNP3_results -k \${optimum_k} -ML -core -min_frac !{params.min_frac} >> /dev/null
 	fi
 	mkdir Trees
 	mkdir SNPs
