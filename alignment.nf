@@ -432,27 +432,29 @@ process BuildPhylogenies {
 	file("Trees/*.tre") into phylogenetic_trees
 	file("SNPs/*") into polymorphisms
 
-	"""
-	\$kSNP3/MakeFasta $kchooser_config MF.fasta > /dev/null
-	\$kSNP3/Kchooser MF.fasta > /dev/null
+	shell:
+	'''
+	#!/bin/sh
+	${KSNP3}/MakeFasta !{kchooser_config} MF.fasta > /dev/null
+	${KSNP3}/Kchooser MF.fasta > /dev/null
 	optimum_k=`grep "The optimum" Kchooser.report | tr -dc '0-9'`
-	cat $kchooser_config > in_list
-	cat $ksnp3_config >> in_list
-	if [ ${params.ML} && ${params.NJ} ]
+	cat !{kchooser_config} > in_list
+	cat !{ksnp3_config} >> in_list
+	if [ !{ML} && !{NJ} ]
 	then
-		\$kSNP3/kSNP3 -in in_list -outdir kSNP3_results -k \$optimum_k -ML -NJ -core -min_frac ${params.min_frac} >> /dev/null
-	elif [ ${params.NJ} ]
+		${KSNP3}/kSNP3 -in in_list -outdir kSNP3_results -k ${optimum_k} -ML -NJ -core -min_frac !{min_frac} >> /dev/null
+	elif [ !{NJ} ]
 	then
-		\$kSNP3/kSNP3 -in in_list -outdir kSNP3_results -k \$optimum_k -NJ -core -min_frac ${params.min_frac} >> /dev/null
+		${KSNP3}/kSNP3 -in in_list -outdir kSNP3_results -k ${optimum_k} -NJ -core -min_frac !{min_frac} >> /dev/null
 	else
-		\$kSNP3/kSNP3 -in in_list -outdir kSNP3_results -k \$optimum_k -ML -core -min_frac ${params.min_frac} >> /dev/null
+		${KSNP3}/kSNP3 -in in_list -outdir kSNP3_results -k ${optimum_k} -ML -core -min_frac !{min_frac} >> /dev/null
 	fi
 	mkdir Trees
 	mkdir SNPs
 	mv kSNP3_results/*.tre Trees
 	mv kSNP3_results/* SNPs
-	rm -rf ${params.work_dir}
-	"""
+	rm -rf !{params.work_dir}
+	'''
 }
 
 // Ignore files with nothing in them. This will
