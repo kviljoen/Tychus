@@ -432,7 +432,6 @@ process BuildPhylogenies {
 	file("Trees/*.tre") into phylogenetic_trees
 	file("SNPs/*") into polymorphisms
 
-	shell:
 	"""
 	${KSNP3}/MakeFasta ${kchooser_config} MF.fasta > /dev/null
 	${KSNP3}/Kchooser MF.fasta > /dev/null
