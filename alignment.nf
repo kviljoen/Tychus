@@ -292,7 +292,7 @@ if( params.plasmid_db ) { //KL: downloaded prebuilt from plsdb
         	set dataset_id, file("${dataset_id}_plasmid_alignment.bam") into plasmid_bam_files
 
         	"""
-        	bowtie2 -p ${task.cpus} -x plasmid.index -1 $forward -2 $reverse -S ${dataset_id}_plasmid_alignment.sam //KL edit
+        	bowtie2 -p ${task.cpus} -x plasmid.index -1 $forward -2 $reverse -S ${dataset_id}_plasmid_alignment.sam
         	samtools view -bS ${dataset_id}_plasmid_alignment.sam | samtools sort -@ ${task.cpus} -o ${dataset_id}_plasmid_alignment.bam
         	"""
 	}
@@ -435,8 +435,8 @@ process BuildPhylogenies {
 	shell:
 	'''
 	#!/bin/sh
-	MakeFasta !{kchooser_config} MF.fasta
-	Kchooser MF.fasta
+	MakeFasta !{kchooser_config} MF.fasta > /dev/null
+	Kchooser MF.fasta > /dev/null
 	optimum_k=`grep "The optimum" Kchooser.report | tr -dc '0-9'`
 	cat !{kchooser_config} > in_list
 	cat !{ksnp3_config} >> in_list
