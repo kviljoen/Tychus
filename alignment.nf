@@ -171,7 +171,7 @@ if( params.amr_db ) {
 
         	input:
         	set dataset_id, file(forward), file(reverse) from amr_read_pairs
-        	file index from amr_index()
+        	file index from amr_index
 
         	output:
         	set dataset_id, file("${dataset_id}_amr_alignment.sam") into amr_sam_files
@@ -228,7 +228,7 @@ if( params.vf_db ) {
 
         	input:
         	set dataset_id, file(forward), file(reverse) from vf_read_pairs
-        	file index from vf_index()
+        	file index from vf_index
 
         	output:
         	set dataset_id, file("${dataset_id}_vf_alignment.sam") into vf_sam_files
@@ -325,7 +325,7 @@ process GenomeAlignment {
 
 	input:
 	set dataset_id, file(forward), file(reverse) from genome_read_pairs
-	file index from genome_index()
+	file index from genome_index
 
 	output:
 	set dataset_id, file("${dataset_id}_genome_alignment.bam") into genome_bam_files
