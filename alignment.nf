@@ -462,7 +462,7 @@ process BuildPhylogenies {
 // to build the appropriate trees.
 phylogenetic_trees.flatten()
 	.filter { file -> !file.isEmpty() }
-	.into { trees }
+	.set { trees }
 
 /*
  * Build phylogenetic trees with Figtree
