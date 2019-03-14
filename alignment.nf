@@ -395,7 +395,7 @@ else {
 	process kSNPGenomeConfiguration {
 		echo true
 
-		storeDir 'temporary_files'
+		//storeDir 'temporary_files'
 		
 		//ref_genome = file(params.genome)
 		
