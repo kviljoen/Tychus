@@ -122,7 +122,7 @@ The download time will take between 5 and 10 minutes depending on your connectio
 
 Run a Test
 ==========
-It is `recommended` that you run these tests for both the `alignment` and `assembly` modules before doing any large-scale analysis. This serves the purpose of getting you comfortable with running each Tychus module, as well as providing you with real output, which you can look back upon later when you get to the [Results](https://github.com/cdeanj/nextflow-tychus#results) section. The reads used in each test were produced with [Art](https://www.niehs.nih.gov/research/resources/software/biostatistics/art/), an artificial read simulator, and constructed with 10x-15x coverage.
+It is `recommended` that you run these tests for both the `alignment` and `assembly` modules before doing any large-scale analysis. This serves the purpose of getting you comfortable with running each Tychus module, as well as providing you with real output, which you can look back upon later when you get to the [Results](https://github.com/cdeanj/nextflow-tychus#results) section. The reads used in each test were produced with [Art](https://www.niehs.nih.gov/research/resources/software/biostatistics/art/), an artificial read simulator, and constructed with 10x-15x coverage. 
 
 Alignment Module
 ----------------
@@ -139,7 +139,7 @@ Container:			abdolab/tychus-alignment
 Duration:			2m 28s
 Output Directory:	/home/username/nextflow-tychus/my_alignment_output
 ```
-
+Please note that reference databases (amr_db, vf_db, plasmid_db) have to be in single line fasta format (as opposed to multiline fasta format) for csa to work
 Assembly Module
 ---------------
 Included in the `assembly` module is a reference to the simulated reads mentioned above. You will not need to specify the location of any reads in this example. To get started, run the following command within the `nextflow-tychus/` directory:
@@ -178,9 +178,9 @@ Usage:
 General Options: 
     --read_pairs      DIR		Directory of paired FASTQ files
     --genome          FILE		Path to the FASTA formatted reference database
-    --amr_db          FILE		Path to the FASTA formatted resistance database
-    --vf_db           FILE		Path to the FASTA formatted virulence database
-    --plasmid_db      FILE		Path to the FASTA formatted plasmid database
+    --amr_db          FILE		Path to the (single line) FASTA formatted resistance database
+    --vf_db           FILE		Path to the (single line) FASTA formatted virulence database
+    --plasmid_db      FILE		Path to the (single line) FASTA formatted plasmid database
     --threads         INT		Number of threads to use for each process
     --out_dir         DIR		Directory to write output files to
 
