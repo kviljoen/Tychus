@@ -66,9 +66,9 @@ Channel
  */
 process RunQC {
 	publishDir "${params.assembly_out_dir}/PreProcessing", mode: "copy"
-
 	tag { dataset_id }
-
+	cache 'deep'
+	
         input:
         set dataset_id, file(forward), file(reverse) from trimmomatic_read_pairs
 
@@ -87,7 +87,8 @@ process RunQC {
  */
 process IdentifyBestKmer {
 	tag { dataset_id }
-
+	cache 'deep'
+	
 	input:
 	set dataset_id, file(forward), file(reverse) from kmer_genie_read_pairs
 
@@ -109,9 +110,9 @@ process IdentifyBestKmer {
  */
 process BuildAbyssAssembly {
 	publishDir "${params.assembly_out_dir}/AbyssContigs", mode: "copy"
-
 	tag { dataset_id }
-
+	cache 'deep'
+	
         input:
         set dataset_id, file(forward), file(reverse) from abyss_kg_pairs
 	val best from best_abyss_kmer_results
@@ -133,9 +134,9 @@ process BuildAbyssAssembly {
  */
 process BuildVelvetAssembly {
 	publishDir "${params.assembly_out_dir}/VelvetContigs", mode: "copy"
-
 	tag { dataset_id }
-
+	cache 'deep'
+	
 	input:
 	set dataset_id, file(forward), file(reverse) from velvet_kg_pairs
 	val best from best_velvet_kmer_results
@@ -159,8 +160,8 @@ process BuildVelvetAssembly {
  */
 process BuildSpadesAssembly {
 	publishDir "${params.assembly_out_dir}/SPadesContigs", mode: "copy"
-	
 	tag { dataset_id }
+	cache 'deep'
 
 	input:
 	set dataset_id, file(forward), file(reverse) from spades_read_pairs
@@ -179,9 +180,9 @@ process BuildSpadesAssembly {
  */
 process BuildIDBAAssembly {
 	publishDir "${params.assembly_out_dir}/IDBAContigs", mode: "copy"
-
 	tag { dataset_id }
-
+	cache 'deep'
+	
 	input:
 	set dataset_id, file(forward), file(reverse) from idba_read_pairs
 
@@ -221,9 +222,9 @@ abyss_assembly_results.concat(
  */
 process IntegrateContigs {
 	publishDir "${params.assembly_out_dir}/IntegratedContigs", mode: "copy"
-
 	tag { dataset_id }
-
+	cache 'deep'
+	
 	input:
 	set dataset_id, file(contigs) from grouped_assembly_contigs
 
@@ -258,8 +259,8 @@ process IntegrateContigs {
  */
 process AnnotateContigs {
 	publishDir "${params.assembly_out_dir}/AnnotatedContigs", mode: "copy"
-
 	tag { dataset_id }
+	cache 'deep'
 
 	input:
 	set dataset_id, file(cisa_contigs) from cisa_integrated_contigs
@@ -293,8 +294,8 @@ abyss_assembly_quast_contigs.concat(
  */
 process EvaluateAssemblies {
 	publishDir "${params.assembly_out_dir}/AssemblyReport", mode: "move"
-
 	tag { dataset_id }
+	cache 'deep'
 
 	input:
 	set dataset_id, file(quast_contigs) from grouped_assembly_quast_contigs
