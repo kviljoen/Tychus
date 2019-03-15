@@ -63,6 +63,12 @@ if(params.help) {
 	return
 }
 
+// Has the run name been specified by the user?
+//  this has the bonus effect of catching both -name and --name
+custom_runName = params.name
+if( !(workflow.runName ==~ /[a-z]+_[a-z]+/) ){
+  custom_runName = workflow.runName
+}
 
 // Returns a tuple of read pairs in the form
 // [dataset_id, forward.fq, reverse.fq] where
@@ -503,13 +509,67 @@ process ConvertNewickToPDF {
 	"""
 }
 
-// Display information about the completed run
-// See https://www.nextflow.io/docs/latest/metadata.html for more
-// information about available onComplete options
+
+/*
+ *
+ * Completion e-mail notification
+ *
+ */
 workflow.onComplete {
-	log.info "Nextflow Version:	$workflow.nextflow.version"
-  	log.info "Command Line:		$workflow.commandLine"
-	log.info "Container:		$workflow.container"
-	log.info "Duration:		$workflow.duration"
-	log.info "Output Directory:	$params.alignment_out_dir"
+  
+    def subject = "[uct-yamp] Successful: $workflow.runName"
+    if(!workflow.success){
+      subject = "[uct-yamp] FAILED: $workflow.runName"
+    }
+    def email_fields = [:]
+    email_fields['version'] = params.version
+    email_fields['runName'] = custom_runName ?: workflow.runName
+    email_fields['success'] = workflow.success
+    email_fields['dateComplete'] = workflow.complete
+    email_fields['duration'] = workflow.duration
+    email_fields['exitStatus'] = workflow.exitStatus
+    email_fields['errorMessage'] = (workflow.errorMessage ?: 'None')
+    email_fields['errorReport'] = (workflow.errorReport ?: 'None')
+    email_fields['commandLine'] = workflow.commandLine
+    email_fields['projectDir'] = workflow.projectDir
+    email_fields['summary'] = summary
+    email_fields['summary']['Date Started'] = workflow.start
+    email_fields['summary']['Date Completed'] = workflow.complete
+    email_fields['summary']['Pipeline script file path'] = workflow.scriptFile
+    email_fields['summary']['Pipeline script hash ID'] = workflow.scriptId
+    if(workflow.repository) email_fields['summary']['Pipeline repository Git URL'] = workflow.repository
+    if(workflow.commitId) email_fields['summary']['Pipeline repository Git Commit'] = workflow.commitId
+    if(workflow.revision) email_fields['summary']['Pipeline Git branch/tag'] = workflow.revision
+    if(workflow.container) email_fields['summary']['Docker image'] = workflow.container
+
+    // Render the TXT template
+    def engine = new groovy.text.GStringTemplateEngine()
+    def tf = new File("$baseDir/assets/email_template.txt")
+    def txt_template = engine.createTemplate(tf).make(email_fields)
+    def email_txt = txt_template.toString()
+
+    // Render the HTML template
+    def hf = new File("$baseDir/assets/email_template.html")
+    def html_template = engine.createTemplate(hf).make(email_fields)
+    def email_html = html_template.toString()
+
+    // Render the sendmail template
+    def smail_fields = [ email: params.email, subject: subject, email_txt: email_txt, email_html: email_html, baseDir: "$baseDir" ]
+    def sf = new File("$baseDir/assets/sendmail_template.txt")
+    def sendmail_template = engine.createTemplate(sf).make(smail_fields)
+    def sendmail_html = sendmail_template.toString()
+
+    // Send the HTML e-mail
+    if (params.email) {
+        try {
+          if( params.plaintext_email ){ throw GroovyException('Send plaintext e-mail, not HTML') }
+          // Try to send HTML e-mail using sendmail
+          [ 'sendmail', '-t' ].execute() << sendmail_html
+          log.info "[uct-yamp] Sent summary e-mail to $params.email (sendmail)"
+        } catch (all) {
+          // Catch failures and try with plaintext
+          [ 'mail', '-s', subject, params.email ].execute() << email_txt
+          log.info "[uct-yamp] Sent summary e-mail to $params.email (mail)"
+        }
+    }
 }
