@@ -169,6 +169,7 @@ if( params.amr_db ) {
 	process AMRAlignment {
         	publishDir "${params.alignment_out_dir}/Alignment", mode: "move", pattern: "*.bam"
 		tag { dataset_id }
+		cache 'deep'
 		
         	input:
         	set dataset_id, file(forward), file(reverse) from amr_read_pairs
@@ -187,7 +188,8 @@ if( params.amr_db ) {
 	process AMRResistome {
         	publishDir "${params.alignment_out_dir}/Resistome", mode: "move"
         	tag { dataset_id }
-
+		cache 'deep'
+		
         	input:
         	file amr_db
         	set dataset_id, file(amr_sam) from amr_sam_files
@@ -225,6 +227,7 @@ if( params.vf_db ) {
 	process VFAlignment {
         	publishDir "${params.alignment_out_dir}/Alignment", mode: "move", pattern: "*.bam"
 		tag { dataset_id }
+		cache 'deep'
 		
         	input:
         	set dataset_id, file(forward), file(reverse) from vf_read_pairs
@@ -243,6 +246,7 @@ if( params.vf_db ) {
 	process VFResistome {
         	publishDir "${params.alignment_out_dir}/Resistome", mode: "move"
         	tag { dataset_id }
+		cache 'deep'
 		
         	input:
         	file vf_db
@@ -281,6 +285,7 @@ if( params.plasmid_db ) { //KL: downloaded prebuilt from plsdb
 	process PlasmidAlignment {
         	publishDir "${params.alignment_out_dir}/Alignment", mode: "move", pattern: "*.bam"
         	tag { dataset_id }
+		cache 'deep'
 		
         	input:
         	set dataset_id, file(forward), file(reverse) from plasmid_read_pairs
@@ -299,6 +304,7 @@ if( params.plasmid_db ) { //KL: downloaded prebuilt from plsdb
 	process PlasmidResistome {
         	publishDir "${params.alignment_out_dir}/Resistome", mode: "move"
         	tag { dataset_id }
+		cache 'deep'
 		
         	input:
         	file plasmid_db
@@ -319,6 +325,7 @@ if( params.plasmid_db ) { //KL: downloaded prebuilt from plsdb
 process GenomeAlignment {
 	publishDir "${params.alignment_out_dir}/Alignment", mode: "copy", pattern: "*.bam"
 	tag { dataset_id }
+	cache 'deep'
 	
 	input:
 	set dataset_id, file(forward), file(reverse) from genome_read_pairs
@@ -340,9 +347,9 @@ process GenomeAlignment {
  */
 process BuildConsensusSequence {
 	tag { dataset_id }
-
 	publishDir "${params.alignment_out_dir}/Consensus", mode: "copy"
-
+	cache 'deep'
+	
 	input:
 	set dataset_id, file(bam) from genome_bam_files
 	set dataset_id, file(bai) from genome_index_files
@@ -418,8 +425,8 @@ else {
  */
 process BuildPhylogenies {
 	publishDir "${params.alignment_out_dir}/SNPsAndPhylogenies", mode: "copy"
-
 	tag { "ConfigurationFiles" }
+	cache 'deep'
 
 	input:
 	file kchooser_config from genome_config
@@ -466,7 +473,8 @@ phylogenetic_trees.flatten()
  */
 process ConvertNewickToPDF {
 	publishDir "${params.alignment_out_dir}/SNPsAndPhylogenies/TreeImages", mode: "move"
-
+	cache 'deep'
+	
 	input:
 	file tree from trees
 
