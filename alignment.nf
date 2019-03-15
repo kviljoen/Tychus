@@ -110,7 +110,8 @@ if( params.draft ) {
  */
 process BuildGenomeIndex {
 	tag { "${genome.baseName}" }
-
+	cache 'deep'
+	
 	input:
 	file genome
 
@@ -127,9 +128,9 @@ process BuildGenomeIndex {
  */
 process RunQC {
         publishDir "${params.alignment_out_dir}/Preprocessing", mode: "copy"
-
-        tag { dataset_id }
-
+   	tag { dataset_id }
+	cache 'deep'
+	
         input:
         set dataset_id, file(forward), file(reverse) from trimmomatic_read_pairs
 
@@ -149,7 +150,8 @@ if( params.amr_db ) {
 	 */
 	process BuildAMRIndex {
 		tag { "${amr_db.baseName}" }
-
+		cache 'deep'
+		
 		input:
         	file amr_db
 
@@ -166,9 +168,8 @@ if( params.amr_db ) {
          */
 	process AMRAlignment {
         	publishDir "${params.alignment_out_dir}/Alignment", mode: "move", pattern: "*.bam"
-
-        	tag { dataset_id }
-
+		tag { dataset_id }
+		
         	input:
         	set dataset_id, file(forward), file(reverse) from amr_read_pairs
         	file index from amr_index
@@ -185,7 +186,6 @@ if( params.amr_db ) {
 
 	process AMRResistome {
         	publishDir "${params.alignment_out_dir}/Resistome", mode: "move"
-
         	tag { dataset_id }
 
         	input:
@@ -207,7 +207,8 @@ if( params.vf_db ) {
          */
 	process BuildVFIndex {
 		tag { "${vf_db.baseName}" }
-
+		cache 'deep' 
+		
 		input:
         	file vf_db
 
@@ -223,9 +224,8 @@ if( params.vf_db ) {
          */
 	process VFAlignment {
         	publishDir "${params.alignment_out_dir}/Alignment", mode: "move", pattern: "*.bam"
-
-        	tag { dataset_id }
-
+		tag { dataset_id }
+		
         	input:
         	set dataset_id, file(forward), file(reverse) from vf_read_pairs
         	file index from vf_index
@@ -242,9 +242,8 @@ if( params.vf_db ) {
 
 	process VFResistome {
         	publishDir "${params.alignment_out_dir}/Resistome", mode: "move"
-
         	tag { dataset_id }
-
+		
         	input:
         	file vf_db
         	set dataset_id, file(vf_sam) from vf_sam_files
@@ -264,7 +263,8 @@ if( params.plasmid_db ) { //KL: downloaded prebuilt from plsdb
          */
 	process BuildPlasmidIndex {
 		tag { "${plasmid_db.baseName}" }
-
+		cache 'deep'
+		
 		input:
        		file plasmid_db
 
@@ -280,7 +280,6 @@ if( params.plasmid_db ) { //KL: downloaded prebuilt from plsdb
          */
 	process PlasmidAlignment {
         	publishDir "${params.alignment_out_dir}/Alignment", mode: "move", pattern: "*.bam"
-
         	tag { dataset_id }
 		
         	input:
@@ -299,9 +298,8 @@ if( params.plasmid_db ) { //KL: downloaded prebuilt from plsdb
 
 	process PlasmidResistome {
         	publishDir "${params.alignment_out_dir}/Resistome", mode: "move"
-
         	tag { dataset_id }
-
+		
         	input:
         	file plasmid_db
         	set dataset_id, file(plasmid_sam) from plasmid_sam_files
@@ -320,9 +318,8 @@ if( params.plasmid_db ) { //KL: downloaded prebuilt from plsdb
  */
 process GenomeAlignment {
 	publishDir "${params.alignment_out_dir}/Alignment", mode: "copy", pattern: "*.bam"
-
 	tag { dataset_id }
-
+	
 	input:
 	set dataset_id, file(forward), file(reverse) from genome_read_pairs
 	file index from genome_index
@@ -341,7 +338,7 @@ process GenomeAlignment {
 /*
  * Call SNPs with Freebayes and integrate them into reference genome with BCFtools
  */
-process BuildConesnsusSequence {
+process BuildConsensusSequence {
 	tag { dataset_id }
 
 	publishDir "${params.alignment_out_dir}/Consensus", mode: "copy"
