@@ -214,7 +214,7 @@ abyss_assembly_results.concat(
 		idba_assembly_results
 	)
 	.groupTuple(sort: true, size: 4)
-	.into { grouped_assembly_contigs }
+	.set { grouped_assembly_contigs }
 	
 
 /*
@@ -286,7 +286,7 @@ abyss_assembly_quast_contigs.concat(
 		cisa_integrated_quast_contigs
         )
         .groupTuple(sort: true, size: 5)
-        .into { grouped_assembly_quast_contigs }
+        .set { grouped_assembly_quast_contigs }
 
 
 /*
