@@ -1,6 +1,6 @@
 # ![kviljoen/Tychus](/assets/cbio_logo.png)
 
-# UCT-Tychus: A WGS pipeline for assembly, annotation and phylogenetics of bacterial genomes, implemented for the University of Cape Town from Tychus (https://github.com/Abdo-Lab/Tychus), implemented in Nextflow
+# UCT-Tychus: A Nextflow WGS pipeline for assembly, annotation and phylogenetics of bacterial genomes
 
 This pipeline accepts raw reads in .fastq format, performs adapter removal (Trimmomatic), followed by the a) assembly module (integrated contigs) and/or b) alignment module (SNP identification, SNP phylogenies, as well as virulence and antimicrobial gene and plasmid profiling)
 
