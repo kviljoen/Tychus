@@ -1,38 +1,9 @@
-<!---
-(Modelled after Will-Rowe's beautiful SEAR README https://github.com/will-rowe/SEAR/blob/master/README.md)
--->
+# ![kviljoen/Tychus](/assets/cbio_logo.png)
 
-[![Gitter chat](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/nextflow-tychus/Lobby?utm_source=share-link&utm_medium=link&utm_campaign=share-link)
-[![CircleCI status](https://circleci.com/gh/cdeanj/Tychus.png?style=shield&circle-token=8be6dead6f6181b2e3413f43f9542141a08b8381)](https://circleci.com/gh/cdeanj/Tychus)
+# UCT-Tychus: A WGS pipeline for assembly, annotation and phylogenetics of bacterial genomes, implemented for the University of Cape Town from Tychus (https://github.com/Abdo-Lab/Tychus), implemented in Nextflow
 
-Tychus: A tool to characterize the bacterial genome.
-====================================================
+This pipeline accepts raw reads in .fastq format, performs adapter removal (Trimmomatic), followed by the a) assembly module (integrated contigs) and/or b) alignment module (SNP identification, SNP phylogenies, as well as virulence and antimicrobial gene and plasmid profiling)
 
-Table of Contents
------------------
-
-[Overview](https://github.com/Abdo-Lab/Tychus#overview)
-
-[Requirements](https://github.com/Abdo-Lab/Tychus#requirements)
-
-[Quickstart](https://github.com/Abdo-Lab/Tychus#quickstart)
-
-[Run a Test](https://github.com/Abdo-Lab/Tychus#run-a-test)
-
-[Options](https://github.com/Abdo-Lab/Tychus#pipeline-options)
-
-[Example Usage](https://github.com/Abdo-Lab/Tychus#example-usage)
-
-[Results](https://github.com/Abdo-Lab/Tychus#results)
-
-[Dependencies](https://github.com/Abdo-Lab/Tychus#dependencies)
-
-[Contact](https://github.com/Abdo-Lab/Tychus#contact)
-
------------------
-
-Overview
-========
 Tychus is a tool that allows researchers to perform massively parallel sequence data analysis with the goal of producing a high confidence and comprehensive description of the bacterial genome. Key features of the Tychus pipeline include the assembly, annotation, and phylogenetic inference of large numbers of WGS isolates in parallel using open-source bioinformatics tools and virtualization technology. The Tychus pipeline relies on two methods to characterize your bacterial sequence data.
 
 The first method is assembly based. The assembly module attempts to produce a comprehensive reconstruction of the genome by relying on the results of multiple *de novo* genome assemblies through the use of multiple assemblers. These assemblies are then used to produce a hybrid or consensus assembly with fewer and longer contigs that can be used as a draft genome for further downstream processes such as annotation, a process by which genomic features of interest are identified and appropriately labelled. Assemblies are then evaluated based on common scoring metrics, such as number of contigs, contig size, and N50.
@@ -41,7 +12,55 @@ The second method is alignment based. The alignment module attempts to produce a
 
 These two modules are not completely independent. Contigs produced from the `assembly` module can be used as input to the `alignment` module. In addition to the user-input reference genome and raw read sequences, these draft genomes can be used by the module's downstream processes to identify SNPs and build phylogenetic trees.
 
--------
+## Nextflow pipeline data flow
+In the direct acyclic graph (DAG) below, vertices represent the pipeline's processes and operators, while the edges represent the data connections (i.e. channels) between them.
+# ![kviljoen/Tychus](/assets/Tychus_assembly_DAG.svg)
+
+## Prerequisites
+
+Hardware requirements:
+
+  - 16+ gigabytes (GB) of RAM.
+  - 125+ gigabytes of hard drive (HDD) space.
+
+The Tychus pipeline is intended to be utilized on Linux servers with large amounts of RAM and disk space with multiple computing cores. The requirements listed above are a must for demonstration purposes.
+
+
+## Documentation
+
+[Overview](https://github.com/kviljoen/Tychus#overview)
+
+[Requirements](https://github.com/kviljoen/Tychus#requirements)
+
+[Quickstart](https://github.com/kviljoen/Tychus#quickstart)
+
+[Run a Test](https://github.com/kviljoen/Tychus#run-a-test)
+
+[Options](https://github.com/kviljoen/Tychus#pipeline-options)
+
+[Example Usage](https://github.com/kviljoen/Tychus#example-usage)
+
+[Results](https://github.com/kviljoen/Tychus#results)
+
+[Dependencies](https://github.com/kviljoen/Tychus#dependencies)
+
+[Contact](https://github.com/kviljoen/Tychus#contact)
+
+
+## Built With
+
+* [Nextflow](https://www.nextflow.io/)
+* [Docker](https://www.docker.com/what-docker)
+* [Singularity](https://singularity.lbl.gov/)
+
+
+## Credits
+
+The Tychus pipeline was built by Chris Dean (https://github.com/Abdo-Lab/Tychus). Please remember to cite 'Tychus: a whole genome sequencing pipeline for assembly, annotation and phylogenetics of bacterial genomes' (https://www.biorxiv.org/content/biorxiv/early/2018/03/16/283101.full.pdf) when using this pipeline. Further development to the Nextflow workflow and containerisation in Docker and Singularity for implementation specifically on UCT's HPC was done by Dr Katie Lennard, with Nextflow template inspiration and code snippets from Phil Ewels http://nf-co.re/
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
 
 Requirements
 ============
@@ -53,6 +72,15 @@ Minimum Hardware Requirements
 
 The Tychus pipeline is intended to be utilized on Linux servers with large amounts of RAM and disk space with multiple computing cores. The requirements listed above are a must for demonstration purposes.
 
+Nextflow (0.26.x or higher), all other software/tools required are contained in the (platform-independent) dockerfile, which should be converted to a singularity image for use on a cluster environment. If you are working on the UCT cluster, all necessary singularity images are specified in the uct_hex.conf profile. If you are working on another cluster environment you would need to build your own singularity image, using the Dockerfile in this repo as a starting point, specifying your own relevant working directories using ```RUN mkdir -p```
+
+There are also reference databases that need to be downloaded (if you are NOT working on the UCT cluster), these are:
+
+For the alignment module: (convert to single line FASTA-formatted if multiline)
+1. Reference genome of interest e.g. ftp://ftp.ncbi.nlm.nih.gov/genomes/genbank/bacteria/Pseudomonas_aeruginosa/reference/GCA_000006765.1_ASM676v1/GCA_000006765.1_ASM676v1_genomic.fna.gz
+2. Plasmid database e.g. https://ccb-microbe.cs.uni-saarland.de/plsdb/plasmids/download/
+3. A Virulence factor database e.g. http://www.mgc.ac.cn/VFs/download.htm
+4. A Antimicrobial resistance gene database e.g. ARG-ANNOT
 
 Software Requirements
 ---------------------
@@ -182,7 +210,7 @@ General Options:
     --vf_db           FILE		Path to the (single line) FASTA formatted virulence database
     --plasmid_db      FILE		Path to the (single line) FASTA formatted plasmid database
     --threads         INT		Number of threads to use for each process
-    --out_dir         DIR		Directory to write output files to
+    --alignment_out_dir         DIR		Directory to write output files to
 
 Trimmomatic Options: 
     --leading         INT		Remove leading low quality or N bases
@@ -220,7 +248,7 @@ Usage:
 General Options: 
     --read_pairs      DIR		Directory of paired FASTQ files
     --threads         INT       Number of threads to use for each process
-    --output          DIR       Directory to write output files to
+    --assembly_out_dir          DIR       Directory to write output files to
 
 Trimmomatic Options: 
     --leading         INT		Remove leading low quality or N bases
