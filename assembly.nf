@@ -59,16 +59,16 @@ if(params.help) {
 Channel
 	.fromFilePairs(params.read_pairs, flat: true)
 	.ifEmpty { exit 1, "Read pairs could not be found: ${params.read_pairs}" }
-	.into { trimmomatic_read_pairs }
+	.set { trimmomatic_read_pairs }
 
 /*
  * Remove adapter sequences and low quality base pairs with Trimmomatic
  */
 process RunQC {
 	publishDir "${params.assembly_out_dir}/PreProcessing", mode: "copy"
-
 	tag { dataset_id }
-
+	cache 'deep'
+	
         input:
         set dataset_id, file(forward), file(reverse) from trimmomatic_read_pairs
 
@@ -76,7 +76,7 @@ process RunQC {
         set dataset_id, file("${dataset_id}_1P.fastq"), file("${dataset_id}_2P.fastq") into (abyss_read_pairs, velvet_read_pairs, spades_read_pairs, idba_read_pairs, kmer_genie_read_pairs)
 
         """
-        java -jar ${TRIMMOMATIC}/trimmomatic-0.36.jar PE -threads ${params.threads} $forward $reverse -baseout ${dataset_id} ILLUMINACLIP:Trimmomatic-0.36/adapters/${params.adapters}:2:30:10:3:TRUE LEADING:${params.leading} TRAILING:${params.trailing} SLIDINGWINDOW:${params.slidingwindow} MINLEN:${params.minlen}
+        java -jar ${TRIMMOMATIC}/trimmomatic-0.36.jar PE -threads ${task.cpus} $forward $reverse -baseout ${dataset_id} ILLUMINACLIP:Trimmomatic-0.36/adapters/${params.adapters}:2:30:10:3:TRUE LEADING:${params.leading} TRAILING:${params.trailing} SLIDINGWINDOW:${params.slidingwindow} MINLEN:${params.minlen}
         mv ${dataset_id}_1P ${dataset_id}_1P.fastq
         mv ${dataset_id}_2P ${dataset_id}_2P.fastq
         """
@@ -87,7 +87,8 @@ process RunQC {
  */
 process IdentifyBestKmer {
 	tag { dataset_id }
-
+	cache 'deep'
+	
 	input:
 	set dataset_id, file(forward), file(reverse) from kmer_genie_read_pairs
 
@@ -98,7 +99,7 @@ process IdentifyBestKmer {
 	"""
 	echo $forward > ${dataset_id}_read_pair_list.txt
 	echo $reverse >> ${dataset_id}_read_pair_list.txt
-	kmergenie "${dataset_id}_read_pair_list.txt" -t ${params.threads} | tail -n 1 | awk '{print \$3}' > ${dataset_id}_best-k.txt
+	kmergenie "${dataset_id}_read_pair_list.txt" -t ${task.cpus} | tail -n 1 | awk '{print \$3}' > ${dataset_id}_best-k.txt
 	cp $forward "${dataset_id}_forward_kg.fq"
 	cp $reverse "${dataset_id}_reverse_kg.fq"
 	"""
@@ -109,9 +110,9 @@ process IdentifyBestKmer {
  */
 process BuildAbyssAssembly {
 	publishDir "${params.assembly_out_dir}/AbyssContigs", mode: "copy"
-
 	tag { dataset_id }
-
+	cache 'deep'
+	
         input:
         set dataset_id, file(forward), file(reverse) from abyss_kg_pairs
 	val best from best_abyss_kmer_results
@@ -123,7 +124,7 @@ process BuildAbyssAssembly {
 	'''
 	#!/bin/sh
 	best_kmer=`cat !{best}`
-	abyss-pe k=$best_kmer name=abyss j=!{params.threads} in='!{forward} !{reverse}'
+	abyss-pe k=$best_kmer name=abyss j=!{task.cpus} in='!{forward} !{reverse}'
         mv abyss-contigs.fa !{dataset_id}_abyss-contigs.fa
 	'''
 }
@@ -133,9 +134,9 @@ process BuildAbyssAssembly {
  */
 process BuildVelvetAssembly {
 	publishDir "${params.assembly_out_dir}/VelvetContigs", mode: "copy"
-
 	tag { dataset_id }
-
+	cache 'deep'
+	
 	input:
 	set dataset_id, file(forward), file(reverse) from velvet_kg_pairs
 	val best from best_velvet_kmer_results
@@ -159,8 +160,8 @@ process BuildVelvetAssembly {
  */
 process BuildSpadesAssembly {
 	publishDir "${params.assembly_out_dir}/SPadesContigs", mode: "copy"
-	
 	tag { dataset_id }
+	cache 'deep'
 
 	input:
 	set dataset_id, file(forward), file(reverse) from spades_read_pairs
@@ -169,7 +170,7 @@ process BuildSpadesAssembly {
 	set dataset_id, file("${dataset_id}_spades-contigs.fa") into (spades_assembly_results, spades_assembly_quast_contigs)
 
 	"""
-	spades.py --pe1-1 ${forward} --pe1-2 ${reverse} -t ${params.threads} -o spades_output
+	spades.py --pe1-1 ${forward} --pe1-2 ${reverse} -t ${task.cpus} -o spades_output
 	mv spades_output/contigs.fasta ${dataset_id}_spades-contigs.fa
 	"""
 }
@@ -179,9 +180,9 @@ process BuildSpadesAssembly {
  */
 process BuildIDBAAssembly {
 	publishDir "${params.assembly_out_dir}/IDBAContigs", mode: "copy"
-
 	tag { dataset_id }
-
+	cache 'deep'
+	
 	input:
 	set dataset_id, file(forward), file(reverse) from idba_read_pairs
 
@@ -190,7 +191,7 @@ process BuildIDBAAssembly {
 
 	"""
 	fq2fa --merge --filter ${forward} ${reverse} ${dataset_id}_idba-paired-contigs.fa
-	idba_ud -r ${dataset_id}_idba-paired-contigs.fa --num_threads ${params.threads} -o ${dataset_id}_idba_output
+	idba_ud -r ${dataset_id}_idba-paired-contigs.fa --num_threads ${task.cpus} -o ${dataset_id}_idba_output
 	mv ${dataset_id}_idba_output/contig.fa ${dataset_id}_idba-contigs.fa	
 	"""
 }
@@ -213,7 +214,7 @@ abyss_assembly_results.concat(
 		idba_assembly_results
 	)
 	.groupTuple(sort: true, size: 4)
-	.into { grouped_assembly_contigs }
+	.set { grouped_assembly_contigs }
 	
 
 /*
@@ -221,9 +222,9 @@ abyss_assembly_results.concat(
  */
 process IntegrateContigs {
 	publishDir "${params.assembly_out_dir}/IntegratedContigs", mode: "copy"
-
 	tag { dataset_id }
-
+	cache 'deep'
+	
 	input:
 	set dataset_id, file(contigs) from grouped_assembly_contigs
 
@@ -258,8 +259,8 @@ process IntegrateContigs {
  */
 process AnnotateContigs {
 	publishDir "${params.assembly_out_dir}/AnnotatedContigs", mode: "copy"
-
 	tag { dataset_id }
+	cache 'deep'
 
 	input:
 	set dataset_id, file(cisa_contigs) from cisa_integrated_contigs
@@ -270,9 +271,9 @@ process AnnotateContigs {
 	"""
 	if [ ${params.species} && ${params.genus} ]
 	then
-		prokka ${cisa_contigs} --genus ${params.genus} --species ${params.species} --centre tychus --prefix ${dataset_id} --cpus ${params.threads} --outdir annotations
+		prokka ${cisa_contigs} --genus ${params.genus} --species ${params.species} --centre tychus --prefix ${dataset_id} --cpus ${task.cpus} --outdir annotations
 	else
-		prokka ${cisa_contigs} --prefix ${dataset_id} --cpus ${params.threads} --outdir annotations
+		prokka ${cisa_contigs} --prefix ${dataset_id} --cpus ${task.cpus} --outdir annotations
 	fi
 	mv annotations/* .
 	"""
@@ -285,7 +286,7 @@ abyss_assembly_quast_contigs.concat(
 		cisa_integrated_quast_contigs
         )
         .groupTuple(sort: true, size: 5)
-        .into { grouped_assembly_quast_contigs }
+        .set { grouped_assembly_quast_contigs }
 
 
 /*
@@ -293,8 +294,8 @@ abyss_assembly_quast_contigs.concat(
  */
 process EvaluateAssemblies {
 	publishDir "${params.assembly_out_dir}/AssemblyReport", mode: "move"
-
 	tag { dataset_id }
+	cache 'deep'
 
 	input:
 	set dataset_id, file(quast_contigs) from grouped_assembly_quast_contigs

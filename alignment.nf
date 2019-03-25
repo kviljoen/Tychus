@@ -35,9 +35,9 @@ if(params.help) {
 	log.info 'General Options: '
 	log.info '    --read_pairs      DIR		Directory of paired FASTQ files'
 	log.info '    --genome          FILE		Path to the FASTA formatted reference database'
-	log.info '    --amr_db          FILE		Path to the FASTA formatted resistance database'
-	log.info '    --vf_db           FILE		Path to the FASTA formatted virulence database'
-	log.info '    --plasmid_db      FILE		Path to the FASTA formatted plasmid database'
+	log.info '    --amr_db          FILE		Path to the (single line) FASTA formatted resistance database'
+	log.info '    --vf_db           FILE		Path to the (single line) FASTA formatted virulence database'
+	log.info '    --plasmid_db      FILE		Path to the (single line) FASTA formatted plasmid database'
 	log.info '    --draft           FILE		Path to the FASTA formatted draft databases'
 	log.info '    --threads         INT		Number of threads to use for each process'
 	log.info '    --alignment_out_dir         DIR		Directory to write output files to'
@@ -63,6 +63,12 @@ if(params.help) {
 	return
 }
 
+// Has the run name been specified by the user?
+//  this has the bonus effect of catching both -name and --name
+custom_runName = params.name
+if( !(workflow.runName ==~ /[a-z]+_[a-z]+/) ){
+  custom_runName = workflow.runName
+}
 
 // Returns a tuple of read pairs in the form
 // [dataset_id, forward.fq, reverse.fq] where
@@ -110,7 +116,8 @@ if( params.draft ) {
  */
 process BuildGenomeIndex {
 	tag { "${genome.baseName}" }
-
+	cache 'deep'
+	
 	input:
 	file genome
 
@@ -127,9 +134,9 @@ process BuildGenomeIndex {
  */
 process RunQC {
         publishDir "${params.alignment_out_dir}/Preprocessing", mode: "copy"
-
-        tag { dataset_id }
-
+   	tag { dataset_id }
+	cache 'deep'
+	
         input:
         set dataset_id, file(forward), file(reverse) from trimmomatic_read_pairs
 
@@ -149,7 +156,8 @@ if( params.amr_db ) {
 	 */
 	process BuildAMRIndex {
 		tag { "${amr_db.baseName}" }
-
+		cache 'deep'
+		
 		input:
         	file amr_db
 
@@ -166,12 +174,12 @@ if( params.amr_db ) {
          */
 	process AMRAlignment {
         	publishDir "${params.alignment_out_dir}/Alignment", mode: "move", pattern: "*.bam"
-
-        	tag { dataset_id }
-
+		tag { dataset_id }
+		cache 'deep'
+		
         	input:
         	set dataset_id, file(forward), file(reverse) from amr_read_pairs
-        	file index from amr_index.first()
+        	file index from amr_index
 
         	output:
         	set dataset_id, file("${dataset_id}_amr_alignment.sam") into amr_sam_files
@@ -185,9 +193,9 @@ if( params.amr_db ) {
 
 	process AMRResistome {
         	publishDir "${params.alignment_out_dir}/Resistome", mode: "move"
-
         	tag { dataset_id }
-
+		cache 'deep'
+		
         	input:
         	file amr_db
         	set dataset_id, file(amr_sam) from amr_sam_files
@@ -207,7 +215,8 @@ if( params.vf_db ) {
          */
 	process BuildVFIndex {
 		tag { "${vf_db.baseName}" }
-
+		cache 'deep' 
+		
 		input:
         	file vf_db
 
@@ -223,12 +232,12 @@ if( params.vf_db ) {
          */
 	process VFAlignment {
         	publishDir "${params.alignment_out_dir}/Alignment", mode: "move", pattern: "*.bam"
-
-        	tag { dataset_id }
-
+		tag { dataset_id }
+		cache 'deep'
+		
         	input:
         	set dataset_id, file(forward), file(reverse) from vf_read_pairs
-        	file index from vf_index.first()
+        	file index from vf_index
 
         	output:
         	set dataset_id, file("${dataset_id}_vf_alignment.sam") into vf_sam_files
@@ -242,9 +251,9 @@ if( params.vf_db ) {
 
 	process VFResistome {
         	publishDir "${params.alignment_out_dir}/Resistome", mode: "move"
-
         	tag { dataset_id }
-
+		cache 'deep'
+		
         	input:
         	file vf_db
         	set dataset_id, file(vf_sam) from vf_sam_files
@@ -264,7 +273,8 @@ if( params.plasmid_db ) { //KL: downloaded prebuilt from plsdb
          */
 	process BuildPlasmidIndex {
 		tag { "${plasmid_db.baseName}" }
-
+		cache 'deep'
+		
 		input:
        		file plasmid_db
 
@@ -280,8 +290,8 @@ if( params.plasmid_db ) { //KL: downloaded prebuilt from plsdb
          */
 	process PlasmidAlignment {
         	publishDir "${params.alignment_out_dir}/Alignment", mode: "move", pattern: "*.bam"
-
         	tag { dataset_id }
+		cache 'deep'
 		
         	input:
         	set dataset_id, file(forward), file(reverse) from plasmid_read_pairs
@@ -292,16 +302,16 @@ if( params.plasmid_db ) { //KL: downloaded prebuilt from plsdb
         	set dataset_id, file("${dataset_id}_plasmid_alignment.bam") into plasmid_bam_files
 
         	"""
-        	bowtie2 -p ${task.cpus} -x $index -1 $forward -2 $reverse -S ${dataset_id}_plasmid_alignment.sam //KL edit
+        	bowtie2 -p ${task.cpus} -x plasmid.index -1 $forward -2 $reverse -S ${dataset_id}_plasmid_alignment.sam
         	samtools view -bS ${dataset_id}_plasmid_alignment.sam | samtools sort -@ ${task.cpus} -o ${dataset_id}_plasmid_alignment.bam
         	"""
 	}
 
 	process PlasmidResistome {
         	publishDir "${params.alignment_out_dir}/Resistome", mode: "move"
-
         	tag { dataset_id }
-
+		cache 'deep'
+		
         	input:
         	file plasmid_db
         	set dataset_id, file(plasmid_sam) from plasmid_sam_files
@@ -320,12 +330,12 @@ if( params.plasmid_db ) { //KL: downloaded prebuilt from plsdb
  */
 process GenomeAlignment {
 	publishDir "${params.alignment_out_dir}/Alignment", mode: "copy", pattern: "*.bam"
-
 	tag { dataset_id }
-
+	cache 'deep'
+	
 	input:
 	set dataset_id, file(forward), file(reverse) from genome_read_pairs
-	file index from genome_index.first()
+	file index from genome_index
 
 	output:
 	set dataset_id, file("${dataset_id}_genome_alignment.bam") into genome_bam_files
@@ -341,11 +351,11 @@ process GenomeAlignment {
 /*
  * Call SNPs with Freebayes and integrate them into reference genome with BCFtools
  */
-process BuildConesnsusSequence {
+process BuildConsensusSequence {
 	tag { dataset_id }
-
 	publishDir "${params.alignment_out_dir}/Consensus", mode: "copy"
-
+	cache 'deep'
+	
 	input:
 	set dataset_id, file(bam) from genome_bam_files
 	set dataset_id, file(bai) from genome_index_files
@@ -395,7 +405,7 @@ else {
 	process kSNPGenomeConfiguration {
 		echo true
 
-		storeDir 'temporary_files'
+		//storeDir 'temporary_files'
 		
 		//ref_genome = file(params.genome)
 		
@@ -421,8 +431,8 @@ else {
  */
 process BuildPhylogenies {
 	publishDir "${params.alignment_out_dir}/SNPsAndPhylogenies", mode: "copy"
-
 	tag { "ConfigurationFiles" }
+	cache 'deep'
 
 	input:
 	file kchooser_config from genome_config
@@ -435,8 +445,8 @@ process BuildPhylogenies {
 	shell:
 	'''
 	#!/bin/sh
-	MakeFasta !{kchooser_config} MF.fasta
-	Kchooser MF.fasta
+	MakeFasta !{kchooser_config} MF.fasta > /dev/null
+	Kchooser MF.fasta > /dev/null
 	optimum_k=`grep "The optimum" Kchooser.report | tr -dc '0-9'`
 	cat !{kchooser_config} > in_list
 	cat !{ksnp3_config} >> in_list
@@ -462,14 +472,15 @@ process BuildPhylogenies {
 // to build the appropriate trees.
 phylogenetic_trees.flatten()
 	.filter { file -> !file.isEmpty() }
-	.into { trees }
+	.set { trees }
 
 /*
  * Build phylogenetic trees with Figtree
  */
 process ConvertNewickToPDF {
 	publishDir "${params.alignment_out_dir}/SNPsAndPhylogenies/TreeImages", mode: "move"
-
+	cache 'deep'
+	
 	input:
 	file tree from trees
 
@@ -498,13 +509,67 @@ process ConvertNewickToPDF {
 	"""
 }
 
-// Display information about the completed run
-// See https://www.nextflow.io/docs/latest/metadata.html for more
-// information about available onComplete options
+
+/*
+ *
+ * Completion e-mail notification
+ *
+ */
 workflow.onComplete {
-	log.info "Nextflow Version:	$workflow.nextflow.version"
-  	log.info "Command Line:		$workflow.commandLine"
-	log.info "Container:		$workflow.container"
-	log.info "Duration:		$workflow.duration"
-	log.info "Output Directory:	$params.alignment_out_dir"
+  
+    def subject = "[uct-yamp] Successful: $workflow.runName"
+    if(!workflow.success){
+      subject = "[uct-yamp] FAILED: $workflow.runName"
+    }
+    def email_fields = [:]
+    email_fields['version'] = params.version
+    email_fields['runName'] = custom_runName ?: workflow.runName
+    email_fields['success'] = workflow.success
+    email_fields['dateComplete'] = workflow.complete
+    email_fields['duration'] = workflow.duration
+    email_fields['exitStatus'] = workflow.exitStatus
+    email_fields['errorMessage'] = (workflow.errorMessage ?: 'None')
+    email_fields['errorReport'] = (workflow.errorReport ?: 'None')
+    email_fields['commandLine'] = workflow.commandLine
+    email_fields['projectDir'] = workflow.projectDir
+    email_fields['summary'] = summary
+    email_fields['summary']['Date Started'] = workflow.start
+    email_fields['summary']['Date Completed'] = workflow.complete
+    email_fields['summary']['Pipeline script file path'] = workflow.scriptFile
+    email_fields['summary']['Pipeline script hash ID'] = workflow.scriptId
+    if(workflow.repository) email_fields['summary']['Pipeline repository Git URL'] = workflow.repository
+    if(workflow.commitId) email_fields['summary']['Pipeline repository Git Commit'] = workflow.commitId
+    if(workflow.revision) email_fields['summary']['Pipeline Git branch/tag'] = workflow.revision
+    if(workflow.container) email_fields['summary']['Docker image'] = workflow.container
+
+    // Render the TXT template
+    def engine = new groovy.text.GStringTemplateEngine()
+    def tf = new File("$baseDir/assets/email_template.txt")
+    def txt_template = engine.createTemplate(tf).make(email_fields)
+    def email_txt = txt_template.toString()
+
+    // Render the HTML template
+    def hf = new File("$baseDir/assets/email_template.html")
+    def html_template = engine.createTemplate(hf).make(email_fields)
+    def email_html = html_template.toString()
+
+    // Render the sendmail template
+    def smail_fields = [ email: params.email, subject: subject, email_txt: email_txt, email_html: email_html, baseDir: "$baseDir" ]
+    def sf = new File("$baseDir/assets/sendmail_template.txt")
+    def sendmail_template = engine.createTemplate(sf).make(smail_fields)
+    def sendmail_html = sendmail_template.toString()
+
+    // Send the HTML e-mail
+    if (params.email) {
+        try {
+          if( params.plaintext_email ){ throw GroovyException('Send plaintext e-mail, not HTML') }
+          // Try to send HTML e-mail using sendmail
+          [ 'sendmail', '-t' ].execute() << sendmail_html
+          log.info "[uct-yamp] Sent summary e-mail to $params.email (sendmail)"
+        } catch (all) {
+          // Catch failures and try with plaintext
+          [ 'mail', '-s', subject, params.email ].execute() << email_txt
+          log.info "[uct-yamp] Sent summary e-mail to $params.email (mail)"
+        }
+    }
 }
