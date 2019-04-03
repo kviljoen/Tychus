@@ -133,18 +133,13 @@ Install Tychus Pipeline
 -----------------------
 The Tychus pipeline can be pulled and installed from Github with the following command:
 ```
-$ git clone https://github.com/Abdo-Lab/Tychus.git
+$ git clone https://github.com/kviljoen/Tychus.git
 $ cd Tychus/
 ```
 
 Install Docker Images
 ---------------------
-Depending on which Tychus module you would like to run, you will need to download the appropriate Docker image in order to resolve the module's tool dependencies. These can be easilly downloaded by typing the following command(s):
-```
-$ docker pull abdolab/tychus-alignment
-$ docker pull abdolab/tychus-assembly
-```
-The download time will take between 5 and 10 minutes depending on your connection speed.
+Depending on which Tychus module you would like to run, you will need to download the appropriate Docker file in order to resolve the module's tool dependencies. Depending on your environment these will have to be built into docker or singularity images.
 
 ----------
 
@@ -179,7 +174,7 @@ Since we are doing *de novo* assemblies, this could take a while, but hopefully 
 ```
 Nextflow Version:       0.23.0
 Command Line:           nextflow run assembly.nf -profile assembly --threads 2 --output my_assembly_output
-Container:              abdolab/tychus-assembly
+Container:              
 Duration:               5m 37s
 Output Directory:       /home/username/nextflow-tychus/my_assembly_output
 ```
@@ -323,7 +318,8 @@ $ nextflow assembly.nf -profile assembly --read_pairs "tutorial/raw_sequence_dat
 
 Database Options
 ----------------
-To include an alternative `reference`, `virulence`, `plasmid`, or `resistance` database, you can do that as well.
+To include an alternative `reference`, `virulence`, `plasmid`, or `resistance` database, you can do that as well. NB these databases (amr_db, vf_db, plasmid_db) have to be in single line fasta format (as opposed to multiline fasta format) for csa to work (please convert first if necessary)
+
 ```
 $ nextflow alignment.nf -profile alignment --read_pairs "tutorial/raw_sequence_data/*_R{1,2}_001.fq.gz" --ref_db "path/to/your/reference/db/ref.fa" --vf_db "path/to/your/virulence/db/vf.fa" --plasmid_db "path/to/your/plasmid/db/plasmid.fa" --amr_db "path/to/your/resistance/db/resistance.fa"
 ```
@@ -395,6 +391,3 @@ Software | Function
 
 ------------
 
-Contact
-=======
-Questions, bugs, or feature requests should be directed to Chris Dean at cdean11 AT rams DOT colostate DOT edu. Alternatively, you can [Submit an Issue](https://github.com/cdeanj/nextflow-tychus/issues) on Github.
