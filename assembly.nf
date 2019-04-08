@@ -319,7 +319,7 @@ process AnnotateContigs {
 	file("${dataset_id}.*") into prokka_annotations
 
 	"""
-	if [ -z ${params.species} && -z ${params.genus} ]
+	if [ -z ${params.species} ] && [ -z ${params.genus} ]
 	then
 		prokka ${cisa_contigs} --prefix ${dataset_id} --cpus ${task.cpus} --outdir annotations
 	else
