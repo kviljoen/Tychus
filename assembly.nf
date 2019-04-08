@@ -52,6 +52,13 @@ if(params.help) {
 	return
 }
 
+params.name = false
+//  this has the bonus effect of catching both -name and --name
+custom_runName = params.name
+if( !(workflow.runName ==~ /[a-z]+_[a-z]+/) ){
+  custom_runName = workflow.runName
+}
+
 // Returns a tuple of read pairs in the form
 // [dataset_id, forward.fq, reverse.fq] where
 // the dataset_id is the shared prefix from
