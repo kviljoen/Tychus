@@ -33,4 +33,4 @@ Pipeline Configuration:
 
 
 --
-uct-cbio/uct-yamp is a Nextflow bioinformatics pipeline using YAMP for reference-based WGS metagenomics data analysis. 
+uct-cbio/uct-tychus is a Nextflow bioinformatics pipeline for single isolate WGS data 
