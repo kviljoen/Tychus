@@ -81,7 +81,9 @@ Channel
         .set { trimmomatic_read_pairs }
 
 // Define multiple-use value channel to guide users to intermediate files in not saved to publishdir
-wherearemyfiles = Channel.value("$baseDir/assets/where_are_my_files.txt")
+Channel.fromPath("$baseDir/assets/where_are_my_files.txt")
+       .into{ch_where_trimmomatic}
+       
 
 // Validate user-inputs
 if( params.genome ) {
@@ -148,7 +150,7 @@ process RunQC {
 	
         input:
         set dataset_id, file(forward), file(reverse) from trimmomatic_read_pairs
-	file wherearemyfiles
+	file wherearemyfiles from ch_where_trimmomatic.collect()
 
         output:
         set dataset_id, file("${dataset_id}_1P.fastq"), file("${dataset_id}_2P.fastq") into (amr_read_pairs, plasmid_read_pairs, vf_read_pairs, genome_read_pairs)
