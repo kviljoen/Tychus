@@ -79,6 +79,9 @@ Channel
 	.ifEmpty { exit 1, "Read pairs could not be found: ${params.read_pairs}" }
         .set { trimmomatic_read_pairs }
 
+// Define multiple-use value channel to guide users to intermediate files in not saved to publishdir
+wherearemyfiles = Channel.value("$baseDir/assets/where_are_my_files.txt")
+
 // Validate user-inputs
 if( params.genome ) {
         genome = file(params.genome)
@@ -133,15 +136,22 @@ process BuildGenomeIndex {
  * Remove adapter sequences and low quality base pairs with Trimmomatic
  */
 process RunQC {
-        publishDir "${params.alignment_out_dir}/Preprocessing", mode: "copy"
-   	tag { dataset_id }
+        publishDir "${params.alignment_out_dir}/Preprocessing", mode: 'copy',
+            saveAs: {filename ->
+                if (!params.saveTrimmed && filename == "where_are_my_files.txt") filename
+                else if (params.saveTrimmed && filename != "where_are_my_files.txt") "trimmed_fastq/$filename"
+                else null
+            }
+	tag { dataset_id }
 	cache 'deep'
 	
         input:
         set dataset_id, file(forward), file(reverse) from trimmomatic_read_pairs
+	file wherearemyfiles_txt from wherearemyfiles
 
         output:
         set dataset_id, file("${dataset_id}_1P.fastq"), file("${dataset_id}_2P.fastq") into (amr_read_pairs, plasmid_read_pairs, vf_read_pairs, genome_read_pairs)
+	file "where_are_my_files.txt"
 
         """
         ${JAVA}/java "-Xmx3G" -jar ${TRIMMOMATIC}/trimmomatic-0.36.jar PE -threads ${task.cpus} $forward $reverse -baseout ${dataset_id} ILLUMINACLIP:Trimmomatic-0.36/adapters/${params.adapters}:2:30:10:3:TRUE LEADING:${params.leading} TRAILING:${params.trailing} SLIDINGWINDOW:${params.slidingwindow} MINLEN:${params.minlen}
