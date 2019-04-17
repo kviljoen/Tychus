@@ -48,6 +48,7 @@ if(params.help) {
 	log.info '    --slidingwindow   INT		Scan read with a sliding window'
 	log.info '    --minlen          INT		Drop reads below INT bases long'
 	log.info '    --adapters        FILE		FASTA formatted adapter sequences'
+	log.info '    --saveTrimmed 	BOOL		Save trimmed FastQ file intermediates
 	log.info ''
 	log.info 'kSNP Options: '
 	log.info '    --ML              BOOL		Estimate maximum likelihood tree'
