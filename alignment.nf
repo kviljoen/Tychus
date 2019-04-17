@@ -148,7 +148,7 @@ process RunQC {
 	
         input:
         set dataset_id, file(forward), file(reverse) from trimmomatic_read_pairs
-	file wherearemyfiles_txt from wherearemyfiles
+	file wherearemyfiles
 
         output:
         set dataset_id, file("${dataset_id}_1P.fastq"), file("${dataset_id}_2P.fastq") into (amr_read_pairs, plasmid_read_pairs, vf_read_pairs, genome_read_pairs)
