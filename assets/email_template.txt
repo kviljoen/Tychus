@@ -1,7 +1,7 @@
 
     
 ========================================
- uct-tychus: version ${version}
+ uct-tychus: version 
 ========================================
 Run Name: $runName
 
