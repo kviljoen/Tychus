@@ -244,7 +244,7 @@ if( params.vf_db ) {
          * Align reads to virulence factor database with Bowtie2
          */
 	process VFAlignment {
-        	publishDir "${params.alignment_out_dir}/Alignment", mode: "move", pattern: "*.bam"
+        	publishDir "${params.alignment_out_dir}/Alignment", mode: "copy", pattern: "*.bam"
 		tag { dataset_id }
 		cache 'deep'
 		
@@ -263,7 +263,7 @@ if( params.vf_db ) {
 	}
 
 	process VFResistome {
-        	publishDir "${params.alignment_out_dir}/Resistome", mode: "move"
+        	publishDir "${params.alignment_out_dir}/Resistome", mode: "copy"
         	tag { dataset_id }
 		cache 'deep'
 		
@@ -302,7 +302,7 @@ if( params.plasmid_db ) { //KL: downloaded prebuilt from plsdb
          * Align reads to plasmid database with Bowtie2
          */
 	process PlasmidAlignment {
-        	publishDir "${params.alignment_out_dir}/Alignment", mode: "move", pattern: "*.bam"
+        	publishDir "${params.alignment_out_dir}/Alignment", mode: "copy", pattern: "*.bam"
         	tag { dataset_id }
 		cache 'deep'
 		
@@ -321,7 +321,7 @@ if( params.plasmid_db ) { //KL: downloaded prebuilt from plsdb
 	}
 
 	process PlasmidResistome {
-        	publishDir "${params.alignment_out_dir}/Resistome", mode: "move"
+        	publishDir "${params.alignment_out_dir}/Resistome", mode: "copy"
         	tag { dataset_id }
 		cache 'deep'
 		
@@ -490,7 +490,7 @@ phylogenetic_trees.flatten()
  * Build phylogenetic trees with Figtree
  */
 process ConvertNewickToPDF {
-	publishDir "${params.alignment_out_dir}/SNPsAndPhylogenies/TreeImages", mode: "move"
+	publishDir "${params.alignment_out_dir}/SNPsAndPhylogenies/TreeImages", mode: "copy"
 	cache 'deep'
 	
 	input:
@@ -529,9 +529,9 @@ process ConvertNewickToPDF {
  */
 workflow.onComplete {
   
-    def subject = "[uct-yamp] Successful: $workflow.runName"
+    def subject = "[uct-tychus] Successful: $workflow.runName"
     if(!workflow.success){
-      subject = "[uct-yamp] FAILED: $workflow.runName"
+      subject = "[uct-tychus] FAILED: $workflow.runName"
     }
     def email_fields = [:]
     email_fields['runName'] = custom_runName ?: workflow.runName
@@ -577,7 +577,7 @@ workflow.onComplete {
         } catch (all) {
           // Catch failures and try with plaintext
           [ 'mail', '-s', subject, params.email ].execute() << email_txt
-          log.info "[uct-yamp] Sent summary e-mail to $params.email (mail)"
+          log.info "[uct-tychus] Sent summary e-mail to $params.email (mail)"
         }
     }
 }
