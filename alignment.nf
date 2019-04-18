@@ -226,7 +226,7 @@ if( params.amr_db ) {
          * Align reads to resistance database with Bowtie2
          */
 	process AMRAlignment {
-        	publishDir "${params.alignment_out_dir}/Alignment", mode: "move", pattern: "*.bam"
+        	publishDir "${params.alignment_out_dir}/Alignment", mode: "copy", pattern: "*.bam"
 		tag { dataset_id }
 		cache 'deep'
 		
@@ -245,7 +245,7 @@ if( params.amr_db ) {
 	}
 
 	process AMRResistome {
-        	publishDir "${params.alignment_out_dir}/Resistome", mode: "move"
+        	publishDir "${params.alignment_out_dir}/Resistome", mode: "copy"
         	tag { dataset_id }
 		cache 'deep'
 		
