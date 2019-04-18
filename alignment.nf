@@ -117,6 +117,46 @@ if( params.draft ) {
         if( !draft_genomes.size() == 0 ) exit 1, "Draft genome file(s) could not be found: ${params.draft}"
 }
 
+
+// Header log info
+log.info "==================================="
+log.info "           UCT-TYCHUS              "
+log.info "==================================="
+def summary = [:]
+summary['Run Name']     = custom_runName ?: workflow.runName
+summary['Reads']        = params.read_pairs
+summary['OS']		= System.getProperty("os.name")
+summary['OS.arch']	= System.getProperty("os.arch") 
+summary['OS.version']	= System.getProperty("os.version")
+summary['javaversion'] = System.getProperty("java.version") //Java Runtime Environment version
+summary['javaVMname'] = System.getProperty("java.vm.name") //Java Virtual Machine implementation name
+summary['javaVMVersion'] = System.getProperty("java.vm.version") //Java Virtual Machine implementation version
+//Gets starting time		
+sysdate = new java.util.Date() 
+summary['User']		= System.getProperty("user.name") //User's account name
+summary['Max Memory']     = params.max_memory
+summary['Max CPUs']       = params.max_cpus
+summary['Max Time']       = params.max_time
+summary['Output dir']     = params.outdir
+summary['Adapter ref']    = params.adapters
+summary['Working dir']    = workflow.workDir
+summary['Container']      = workflow.container
+if(workflow.revision) summary['Pipeline Release'] = workflow.revision
+summary['Current home']   = "$HOME"
+summary['Current user']   = "$USER"
+summary['Current path']   = "$PWD"
+summary['Script dir']     = workflow.projectDir
+summary['Config Profile'] = workflow.profile
+if(params.email) {
+    summary['E-mail Address'] = params.email
+}
+log.info summary.collect { k,v -> "${k.padRight(15)}: $v" }.join("\n")
+log.info "========================================="
+
+
+
+
+
 /*
  * Build reference genome index with Bowtie2
  */
