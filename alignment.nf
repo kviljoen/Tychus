@@ -530,7 +530,7 @@ phylogenetic_trees.flatten()
  * Build phylogenetic trees with Figtree
  */
 process ConvertNewickToPDF {
-	publishDir "${params.alignment_out_dir}/SNPsAndPhylogenies/TreeImages", mode: "copy"
+	publishDir "${params.alignment_out_dir}/SNPsAndPhylogenies/TreeImages", mode: "move"
 	cache 'deep'
 	
 	input:
