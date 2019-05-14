@@ -493,6 +493,7 @@ process BuildPhylogenies {
 	output:
 	file("Trees/*.tre") into phylogenetic_trees
 	file("SNPs/*") into polymorphisms
+	file in_list 
 
 	shell:
 	'''
@@ -515,7 +516,7 @@ process BuildPhylogenies {
 	mkdir SNPs
 	mv kSNP3_results/*.tre Trees
 	mv kSNP3_results/* SNPs
-	rm -rf !{params.work_dir}
+	
 	'''
 }
 
