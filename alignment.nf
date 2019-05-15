@@ -493,14 +493,15 @@ process BuildPhylogenies {
 	output:
 	file("Trees/*.tre") into phylogenetic_trees
 	file("SNPs/*") into polymorphisms
-	file in_list 
-
+	file optimum_k_chosen
+	
 	shell:
 	'''
 	#!/bin/sh
 	MakeFasta !{kchooser_config} MF.fasta > /dev/null
 	Kchooser MF.fasta > /dev/null
 	optimum_k=`grep "The optimum" Kchooser.report | tr -dc '0-9'`
+	cat "${optimum_k}" > optimum_k_chosen
 	cat !{kchooser_config} > in_list
 	cat !{ksnp3_config} >> in_list
 	if [ !{params.ML} && !{params.NJ} ]
@@ -516,7 +517,7 @@ process BuildPhylogenies {
 	mkdir SNPs
 	mv kSNP3_results/*.tre Trees
 	mv kSNP3_results/* SNPs
-	
+	rm -rf !{params.work_dir}
 	'''
 }
 
