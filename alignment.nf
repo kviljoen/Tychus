@@ -456,8 +456,7 @@ else {
 	 * Create configuration file for kSNP3 using the user-input reference genome
 	 */
 	process kSNPGenomeConfiguration {
-		echo true
-
+		publishDir "${params.alignment_out_dir}/kSNP3_genome_config", mode: "copy"
 		//storeDir 'temporary_files'
 		
 		//ref_genome = file(params.genome)
@@ -468,6 +467,7 @@ else {
 		output:
 		file("genome_paths.txt") into genome_config
 		file("$genome") into kchooser_genome
+		file genome_paths.txt
 
 		shell:
 		'''
