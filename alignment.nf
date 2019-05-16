@@ -167,7 +167,7 @@ log.info "========================================="
  */
 process BuildGenomeIndex {
 	tag { "${genome.baseName}" }
-	publishDir "${params.alignment_out_dir}/GenomeIndex", mode: copy 
+	publishDir "${params.alignment_out_dir}/GenomeIndex", mode: 'copy' 
 	cache 'deep'
 	
 	input:
@@ -215,7 +215,7 @@ if( params.amr_db ) {
 	 */
 	process BuildAMRIndex {
 		tag { "${amr_db.baseName}" }
-		publishDir "${params.alignment_out_dir}/AMRIndex", mode: copy 
+		publishDir "${params.alignment_out_dir}/AMRIndex", mode: 'copy' 
 		cache 'deep'
 		
 		input:
@@ -275,7 +275,7 @@ if( params.vf_db ) {
          */
 	process BuildVFIndex {
 		tag { "${vf_db.baseName}" }
-		publishDir "${params.alignment_out_dir}/VFIndex", mode: copy 
+		publishDir "${params.alignment_out_dir}/VFIndex", mode: 'copy' 
 		cache 'deep' 
 		
 		input:
@@ -334,7 +334,7 @@ if( params.plasmid_db ) { //KL: downloaded prebuilt from plsdb
          */
 	process BuildPlasmidIndex {
 		tag { "${plasmid_db.baseName}" }
-		publishDir "${params.alignment_out_dir}/PlasmidIndex", mode: copy 
+		publishDir "${params.alignment_out_dir}/PlasmidIndex", mode: 'copy' 
 		cache 'deep'
 		
 		input:
