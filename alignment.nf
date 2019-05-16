@@ -111,6 +111,11 @@ if( params.plasmid_db ) {
 //	if( !annot_db.exists() ) exit 1, "Annotation file could not be found: ${params.annot_db}"
 //}
 
+if( params.user_genome_paths) {
+        user_genome_paths= file(params.user_genome_paths)
+        if( !user_genome_paths.exists() ) exit 1, "User-defined genome paths file could not be found: ${params.user_genome_paths}"
+}
+
 if( params.draft ) {
         draft_path = params.draft.substring(0, params.draft.lastIndexOf("/"))
 	draft_genomes = Channel.fromPath(params.draft).toSortedList()
@@ -453,6 +458,15 @@ if( params.draft ) {
                 done
                 '''
 	}
+}
+
+else if (params.user_genome_paths) {
+	/*
+	 * Use pre-made user-specified genome reference file for kSNP3 (useful when needing to add additional reference species to referenc tree)
+	 */
+	Channel.fromPath(user_genome_paths)
+       .into{genome_config}
+
 }
 
 else {
