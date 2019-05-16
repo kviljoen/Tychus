@@ -493,7 +493,8 @@ process BuildPhylogenies {
 	output:
 	file("Trees/*.tre") into phylogenetic_trees
 	file("SNPs/*") into polymorphisms
-	file optimum_k_chosen
+	file "optimum_k_chosen"
+	file "Kchooser.report"
 	
 	shell:
 	'''
