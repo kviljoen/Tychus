@@ -486,7 +486,7 @@ else if (params.draft && params.user_genome_paths ) {
                 do
                         echo "!{draft_path}/${d}\t${d%.*}" >> genome_paths.txt
                 done
-		echo "!{user_input}\t!{user_input.baseName}" >> genome_paths.txt
+		cat "!{user_input}" >> genome_paths.txt
                 '''
 	}
 }
