@@ -39,6 +39,7 @@ if(params.help) {
 	log.info '    --vf_db           FILE		Path to the (single line) FASTA formatted virulence database'
 	log.info '    --plasmid_db      FILE		Path to the (single line) FASTA formatted plasmid database'
 	log.info '    --draft           FILE		Path to the FASTA formatted draft databases'
+	log.info '    --user_genome_paths FILE  Path to file specifying reference genomes (in addition to that specified by --genome) for inclusion in the phylogenetic SNP tree. See example file ('fasta_list') in this repo.'
 	log.info '    --threads         INT		Number of threads to use for each process'
 	log.info '    --alignment_out_dir         DIR		Directory to write output files to'
 	log.info ''
@@ -111,6 +112,11 @@ if( params.plasmid_db ) {
 //	if( !annot_db.exists() ) exit 1, "Annotation file could not be found: ${params.annot_db}"
 //}
 
+if( params.user_genome_paths) {
+        user_genome_paths= file(params.user_genome_paths)
+        if( !user_genome_paths.exists() ) exit 1, "User-defined genome paths file could not be found: ${params.user_genome_paths}"
+}
+
 if( params.draft ) {
         draft_path = params.draft.substring(0, params.draft.lastIndexOf("/"))
 	draft_genomes = Channel.fromPath(params.draft).toSortedList()
@@ -162,7 +168,7 @@ log.info "========================================="
  */
 process BuildGenomeIndex {
 	tag { "${genome.baseName}" }
-	publishDir "${params.alignment_out_dir}/GenomeIndex", mode: copy 
+	publishDir "${params.alignment_out_dir}/GenomeIndex", mode: 'copy' 
 	cache 'deep'
 	
 	input:
@@ -210,7 +216,7 @@ if( params.amr_db ) {
 	 */
 	process BuildAMRIndex {
 		tag { "${amr_db.baseName}" }
-		publishDir "${params.alignment_out_dir}/AMRIndex", mode: copy 
+		publishDir "${params.alignment_out_dir}/AMRIndex", mode: 'copy' 
 		cache 'deep'
 		
 		input:
@@ -270,7 +276,7 @@ if( params.vf_db ) {
          */
 	process BuildVFIndex {
 		tag { "${vf_db.baseName}" }
-		publishDir "${params.alignment_out_dir}/VFIndex", mode: copy 
+		publishDir "${params.alignment_out_dir}/VFIndex", mode: 'copy' 
 		cache 'deep' 
 		
 		input:
@@ -329,7 +335,7 @@ if( params.plasmid_db ) { //KL: downloaded prebuilt from plsdb
          */
 	process BuildPlasmidIndex {
 		tag { "${plasmid_db.baseName}" }
-		publishDir "${params.alignment_out_dir}/PlasmidIndex", mode: copy 
+		publishDir "${params.alignment_out_dir}/PlasmidIndex", mode: 'copy' 
 		cache 'deep'
 		
 		input:
@@ -430,7 +436,8 @@ process BuildConsensusSequence {
 	"""
 }
 
-if( params.draft ) {
+if( params.draft && !params.user_genome_paths ) {
+
 	/*
 	 * Create configuration file for kSNP3 using the draft assemblies and user-input reference genome
 	 */
@@ -453,6 +460,46 @@ if( params.draft ) {
                 done
                 '''
 	}
+}
+
+	/*
+	 * Use pre-made user-specified genome reference file AND draft contigs from assembly module for kSNP3 (useful when needing to add additional reference species to referenc tree)
+	 */
+else if (params.draft && params.user_genome_paths ) {
+		process kSNPDraftAndExtraReferenceConfiguration {
+		echo true
+
+		Channel.fromPath(user_genome_paths)
+       		.into{user_genome_config}
+		
+		input:
+                file draft from draft_genomes
+		file user_input from user_genome_config
+  
+                output:
+                file("genome_paths.txt") into genome_config
+
+                shell:
+                '''
+                #!/bin/sh
+                echo "!{genome}\t!{genome.baseName}" > genome_paths.txt
+                for d in !{draft};
+                do
+                        echo "!{draft_path}/${d}\t${d%.*}" >> genome_paths.txt
+                done
+		cat "!{user_input}" >> genome_paths.txt
+                '''
+	}
+}
+
+
+else if (params.user_genome_paths && !params.draft) {
+	/*
+	 * Use pre-made user-specified genome reference file for kSNP3 (useful when needing to add additional reference species to referenc tree)
+	 */
+	Channel.fromPath(user_genome_paths)
+       .into{genome_config}
+
 }
 
 else {
@@ -488,7 +535,6 @@ else {
 process BuildPhylogenies {
 	publishDir "${params.alignment_out_dir}/SNPsAndPhylogenies", mode: "copy"
 	tag { "ConfigurationFiles" }
-	cache 'deep' 
 	
 	input:
 	file kchooser_config from genome_config
