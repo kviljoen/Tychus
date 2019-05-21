@@ -435,7 +435,8 @@ process BuildConsensusSequence {
 	"""
 }
 
-if( params.draft ) {
+if( params.draft && !params.user_genome_paths ) {
+
 	/*
 	 * Create configuration file for kSNP3 using the draft assemblies and user-input reference genome
 	 */
@@ -460,7 +461,38 @@ if( params.draft ) {
 	}
 }
 
-else if (params.user_genome_paths) {
+	/*
+	 * Use pre-made user-specified genome reference file AND draft contigs from assembly module for kSNP3 (useful when needing to add additional reference species to referenc tree)
+	 */
+else if (params.draft && params.user_genome_paths ) {
+		process kSNPDraftAndExtraReferenceConfiguration {
+		echo true
+
+		Channel.fromPath(user_genome_paths)
+       		.into{user_genome_config}
+		
+		input:
+                file draft from draft_genomes
+		file user_input from user_genome_config
+  
+                output:
+                file("genome_paths.txt") into genome_config
+
+                shell:
+                '''
+                #!/bin/sh
+                echo "!{genome}\t!{genome.baseName}" > genome_paths.txt
+                for d in !{draft};
+                do
+                        echo "!{draft_path}/${d}\t${d%.*}" >> genome_paths.txt
+                done
+		echo "!{user_input}\t!{user_input.baseName}" >> genome_paths.txt
+                '''
+	}
+}
+
+
+else if (params.user_genome_paths && !params.draft) {
 	/*
 	 * Use pre-made user-specified genome reference file for kSNP3 (useful when needing to add additional reference species to referenc tree)
 	 */
