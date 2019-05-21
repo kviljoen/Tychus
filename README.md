@@ -28,7 +28,7 @@ The Tychus pipeline is intended to be utilized on Linux servers with large amoun
 
 ## Documentation
 
-[Overview](https://github.com/kviljoen/Tychus/tree/ilifu-dev#overview)
+[Overview](https://github.com/kviljoen/Tychus#overview)
 
 [Requirements](https://github.com/kviljoen/Tychus#requirements)
 
