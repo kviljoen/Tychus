@@ -535,7 +535,6 @@ else {
 process BuildPhylogenies {
 	publishDir "${params.alignment_out_dir}/SNPsAndPhylogenies", mode: "copy"
 	tag { "ConfigurationFiles" }
-	cache 'deep' 
 	
 	input:
 	file kchooser_config from genome_config
