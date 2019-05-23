@@ -555,12 +555,12 @@ process BuildPhylogenies {
 	cat !{ksnp3_config} >> in_list
 	if [ !{params.ML} && !{params.NJ} ]
 	then
-		kSNP3 -in in_list -outdir kSNP3_results -k "${optimum_k}" -ML -NJ -core -min_frac !{params.min_frac} >> /dev/null
+		kSNP3 -in in_list -outdir kSNP3_results -k "${optimum_k}" -CPU !{task.cpus} -ML -NJ -core -min_frac !{params.min_frac} >> /dev/null
 	elif [ !{params.NJ} ]
 	then
-		kSNP3 -in in_list -outdir kSNP3_results -k "${optimum_k}" -NJ -core -min_frac !{params.min_frac} >> /dev/null
+		kSNP3 -in in_list -outdir kSNP3_results -k "${optimum_k}" -CPU !{task.cpus} -NJ -core -min_frac !{params.min_frac} >> /dev/null
 	else
-		kSNP3 -in in_list -outdir kSNP3_results -k "${optimum_k}" -ML -core -min_frac !{params.min_frac} >> /dev/null
+		kSNP3 -in in_list -outdir kSNP3_results -k "${optimum_k}" -CPU !{task.cpus} -ML -core -min_frac !{params.min_frac} >> /dev/null
 	fi
 	mkdir Trees
 	mkdir SNPs
