@@ -483,7 +483,8 @@ else if (params.draft && params.user_genome_paths ) {
                 output:
                 file("genome_paths.txt") into genome_config
 		file "draft_test_KL.txt"
-
+		file "d_test_KL.txt"
+		
                 shell:
                 '''
                 #!/bin/sh
@@ -492,7 +493,7 @@ else if (params.draft && params.user_genome_paths ) {
                 for d in !{draft};
                 do
 			echo ${d} >> d_test_KL.txt
-                        echo "!{draft.baseName}/${d}\t${d%.*}" >> genome_paths.txt
+                        echo "${d}\t${d.baseName}" >> genome_paths.txt
                 done
 		cat "!{user_input}" >> genome_paths.txt
                 '''
