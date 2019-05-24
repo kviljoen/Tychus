@@ -120,7 +120,6 @@ if( params.user_genome_paths) {
 if( params.draft ) {
 	Channel
         	.fromPath(params.draft)
-		.toSortedList()
 		.ifEmpty { exit 1, "Draft genome(s) could not be found: ${params.draft}" }
         	.set { draft_genomes }
 }
@@ -477,7 +476,7 @@ else if (params.draft && params.user_genome_paths ) {
        		.into{user_genome_config}
 		
 		input:
-                file draft from draft_genomes
+                file draft from draft_genomes.toList()
 		file user_input from user_genome_config
   
                 output:
@@ -493,7 +492,7 @@ else if (params.draft && params.user_genome_paths ) {
                 for d in !{draft};
                 do
 			echo ${d} >> d_test_KL.txt
-                        echo "${d}\t${d.baseName}" >> genome_paths.txt
+                        //echo "${d}\t${d.baseName}" >> genome_paths.txt
                 done
 		cat "!{user_input}" >> genome_paths.txt
                 '''
