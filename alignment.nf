@@ -491,7 +491,7 @@ else if (params.draft && params.user_genome_paths ) {
                 for d in !{draft};
                 do
 			echo ${d} >> d_test_KL.txt
-                        echo "!{draft_path}/${d}\t${d%.*}" >> genome_paths.txt
+                        echo "!{draft.baseName}/${d}\t${d%.*}" >> genome_paths.txt
                 done
 		cat "!{user_input}" >> genome_paths.txt
                 '''
