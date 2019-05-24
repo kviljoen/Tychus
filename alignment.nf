@@ -119,7 +119,7 @@ if( params.user_genome_paths) {
 
 if( params.draft ) {
         draft_path = params.draft.substring(0, params.draft.lastIndexOf("/"))
-	draft_genomes = Channel.fromPath(params.draft).toSortedList()
+	draft_genomes = Channel.fromPath(params.draft)
         if( !draft_genomes.size() == 0 ) exit 1, "Draft genome file(s) could not be found: ${params.draft}"
 }
 
@@ -489,6 +489,7 @@ else if (params.draft && params.user_genome_paths ) {
 		echo !{draft} > draft_test_KL.txt
                 for d in !{draft};
                 do
+			echo ${d} >> d_test_KL.txt
                         echo "!{draft_path}/${d}\t${d%.*}" >> genome_paths.txt
                 done
 		cat "!{user_input}" >> genome_paths.txt
