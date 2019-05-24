@@ -545,6 +545,7 @@ process BuildPhylogenies {
 	file("SNPs/*") into polymorphisms
 	file "Kchooser.report"
 	file "genome_paths.txt"
+	file "in_list"
 	
 	shell:
 	'''
