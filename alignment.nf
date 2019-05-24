@@ -119,7 +119,7 @@ if( params.user_genome_paths) {
 
 if( params.draft ) {
 	Channel
-        	.fromPath("${params.draft}/*integrated*")
+        	.fromPath(params.draft)
 		.ifEmpty { exit 1, "Draft genome(s) could not be found: ${params.draft}" }
         	.set { draft_genomes }
 }
