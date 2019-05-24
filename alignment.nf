@@ -467,6 +467,8 @@ if( params.draft && !params.user_genome_paths ) {
 	 */
 else if (params.draft && params.user_genome_paths ) {
 		process kSNPDraftAndExtraReferenceConfiguration {
+		publishDir "${params.alignment_out_dir}/KL_test", mode: "copy"
+
 		echo true
 
 		Channel.fromPath(user_genome_paths)
@@ -478,11 +480,13 @@ else if (params.draft && params.user_genome_paths ) {
   
                 output:
                 file("genome_paths.txt") into genome_config
+		
 
                 shell:
                 '''
                 #!/bin/sh
                 echo "!{genome}\t!{genome.baseName}" > genome_paths.txt
+		cat !{draft} > draft_test_KL.txt
                 for d in !{draft};
                 do
                         echo "!{draft_path}/${d}\t${d%.*}" >> genome_paths.txt
