@@ -480,7 +480,7 @@ else if (params.draft && params.user_genome_paths ) {
   
                 output:
                 file("genome_paths.txt") into genome_config
-		
+		file "draft_test_KL.txt"
 
                 shell:
                 '''
