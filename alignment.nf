@@ -120,7 +120,7 @@ if( params.user_genome_paths) {
 if( params.draft ) {
         draft_path = params.draft.substring(0, params.draft.lastIndexOf("/"))
 	draft_genomes = Channel.fromPath(params.draft)
-        if( !draft_genomes.size() == 0 ) exit 1, "Draft genome file(s) could not be found: ${params.draft}"
+        if( !draft_genomes.exists() ) exit 1, "Draft genome file(s) could not be found: ${params.draft}"
 }
 
 
