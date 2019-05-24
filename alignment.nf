@@ -486,7 +486,7 @@ else if (params.draft && params.user_genome_paths ) {
                 '''
                 #!/bin/sh
                 echo "!{genome}\t!{genome.baseName}" > genome_paths.txt
-		cat !{draft} > draft_test_KL.txt
+		echo !{draft} > draft_test_KL.txt
                 for d in !{draft};
                 do
                         echo "!{draft_path}/${d}\t${d%.*}" >> genome_paths.txt
