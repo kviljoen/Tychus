@@ -474,7 +474,7 @@ else if (params.draft && params.user_genome_paths ) {
        		.into{user_genome_config}
 		
 		input:
-		val draft_filepath user_draft_genomes.collect()
+		val draft_filepath from user_draft_genomes.collect()
 		file user_input from user_genome_config
   
                 output:
