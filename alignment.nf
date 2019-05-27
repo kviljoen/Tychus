@@ -118,10 +118,8 @@ if( params.user_genome_paths) {
 }
 
 if( params.draft ) {
-	Channel.fromPath(params.draft).toList()
-	.ifEmpty { exit 1, "Draft contigs could not be found: ${params.draft}" }
-	.set{user_draft_genomes}
-
+	user_draft_genomes=params.draft
+        if( !user_draft_genomes.exists() ) exit 1, "User-defined draft directory could not be found: ${params.draft}"
 }
 
 
@@ -476,7 +474,7 @@ else if (params.draft && params.user_genome_paths ) {
        		.into{user_genome_config}
 		
 		input:
-                each filepath from user_draft_genomes
+                user_draft_genomes
 		file user_input from user_genome_config
   
                 output:
@@ -487,7 +485,8 @@ else if (params.draft && params.user_genome_paths ) {
                 '''
                 #!/bin/sh
                 echo "!{genome}\t!{genome.baseName}" > genome_paths.txt
-		echo "!{filepath}" >>  genome_paths.txt 
+		paste -d '\t' <(for i in `ls -1 !{user_draft_genomes}/*integrated_contigs.fa`; 
+		do basename=$(basename $i}); echo ${basename%_*}; done) <(ls -1 !{user_draft_genomes/*integrated_contigs.fa} ) >> genome_paths.txt
 		cat "!{user_input}" >> genome_paths.txt
                 '''
 	}
