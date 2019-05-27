@@ -475,7 +475,7 @@ else if (params.draft && params.user_genome_paths ) {
        		.into{user_genome_config}
 		
 		input:
-                set draft from draft_genomes
+                set draft from draft_genomes.collect()
 		file user_input from user_genome_config
   
                 output:
@@ -489,7 +489,7 @@ else if (params.draft && params.user_genome_paths ) {
 		
                 for d in !{draft};
                 do
-                        echo "!{draft_path}/${d}\t${d%.*}" >> genome_paths.txt
+                        echo "/${d}\t${d.baseName}" >> genome_paths.txt
                 done
 		
 		cat "!{user_input}" >> genome_paths.txt
