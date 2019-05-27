@@ -119,11 +119,9 @@ if( params.user_genome_paths) {
 
 if( params.draft ) {
 	Channel
-        	.fromPath(params.draft)
-		.flatten()
+        	.fromFilePairs(params.draft)
 		.ifEmpty { exit 1, "Draft genome(s) could not be found: ${params.draft}" }
-		.map { file -> tuple(file.baseName, file) }
-        	.into { draft_genomes }
+        	.set { draft_genomes }
 }
 
 
@@ -489,10 +487,7 @@ else if (params.draft && params.user_genome_paths ) {
                 '''
                 #!/bin/sh
                 echo "!{genome}\t!{genome.baseName}" > genome_paths.txt
-		for x in "!{draft_contigs}"
-		do 
-			echo "${x}" >> genome_paths.txt
-		done
+		echo "!{draft_contigs}\t!{sampleId}" >> genome_paths.txt
 		cat "!{user_input}" >> genome_paths.txt
                 '''
 	}
