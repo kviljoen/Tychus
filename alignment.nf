@@ -476,7 +476,7 @@ else if (params.draft && params.user_genome_paths ) {
        		.into{user_genome_config}
 		
 		input:
-                set sampleId, draft_contigs from user_draft_genomes
+                set sampleId, file(draft_contigs) from user_draft_genomes
 		file user_input from user_genome_config
   
                 output:
@@ -488,7 +488,7 @@ else if (params.draft && params.user_genome_paths ) {
                 #!/bin/sh
                 echo "!{genome}\t!{genome.baseName}" > genome_paths.txt
 		
-                for d in "!{draft_contigs}";
+                for d in "!{sampleId}";
                 do
                         echo "/${d}\t${d.baseName}" >> genome_paths.txt
                 done
