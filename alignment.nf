@@ -476,24 +476,18 @@ else if (params.draft && params.user_genome_paths ) {
        		.into{user_genome_config}
 		
 		input:
-                file draft from draft_genomes.toList()
+                file draft from draft_genomes
 		file user_input from user_genome_config
   
                 output:
                 file("genome_paths.txt") into genome_config
-		file "draft_test_KL.txt"
-		file "d_test_KL.txt"
+
 		
                 shell:
                 '''
                 #!/bin/sh
                 echo "!{genome}\t!{genome.baseName}" > genome_paths.txt
-		echo !{draft} > draft_test_KL.txt
-                for d in !{draft};
-                do
-			echo ${d} >> d_test_KL.txt
-                        //echo "${d}\t${d.baseName}" >> genome_paths.txt
-                done
+		echo !{draft.collect{'$PWD/'+it}.join(\t)} >> genome_paths.txt
 		cat "!{user_input}" >> genome_paths.txt
                 '''
 	}
