@@ -119,8 +119,8 @@ if( params.user_genome_paths) {
 
 if( params.draft ) {
 	Channel.fromPath(params.draft).collect()
-	.into{user_draft_genomes}
-	if( !user_draft_genomes.exists() ) exit 1, "Draft genome file(s) could not be found: ${params.draft}"
+	.ifEmpty { exit 1, "Draft contigs could not be found: ${params.draft}" }
+	.set{user_draft_genomes}
 
 }
 
