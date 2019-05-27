@@ -487,7 +487,7 @@ else if (params.draft && params.user_genome_paths ) {
                 '''
                 #!/bin/sh
                 echo "!{genome}\t!{genome.baseName}" > genome_paths.txt
-		for every x in !{sampleId}
+		for x in !{sampleId}
 		do
 			echo "${x}\t${x.baseName}" >> genome_paths.txt
 		done
