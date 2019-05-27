@@ -483,7 +483,7 @@ else if (params.draft && params.user_genome_paths ) {
                 '''
                 #!/bin/sh
                 echo "!{genome}\t!{genome.baseName}" > genome_paths.txt
-		paste -d '\t' ls -1 "!{user_draft_genomes}" >> genome_paths.txt
+		paste -d '\t' <(ls -1 "!{user_draft_genomes}/*integrated_contigs.fa") >> genome_paths.txt
 		cat "!{user_input}" >> genome_paths.txt
                 '''
 	}
