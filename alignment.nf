@@ -119,7 +119,7 @@ if( params.user_genome_paths) {
 
 if( params.draft ) {
 	Channel.fromPath(params.draft)
-	.into(user_draft_genomes)
+	.set { user_draft_genomes }
 }
 
 
