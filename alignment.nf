@@ -120,7 +120,7 @@ if( params.user_genome_paths) {
 if( params.draft ) {
 	Channel
         	.fromPath(params.draft)
-		.collect()
+		.flatten()
 		.ifEmpty { exit 1, "Draft genome(s) could not be found: ${params.draft}" }
 		.map { file -> tuple(file.baseName, file) }
         	.into { draft_genomes }
