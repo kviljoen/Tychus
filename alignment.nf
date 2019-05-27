@@ -476,7 +476,7 @@ else if (params.draft && params.user_genome_paths ) {
        		.into{user_genome_config}
 		
 		input:
-                set id, file draft from draft_genomes
+                set id, file(draft) from draft_genomes
 		file user_input from user_genome_config
   
                 output:
