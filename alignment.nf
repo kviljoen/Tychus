@@ -487,7 +487,7 @@ else if (params.draft && params.user_genome_paths ) {
                 '''
                 #!/bin/sh
                 echo "!{genome}\t!{genome.baseName}" > genome_paths.txt
-		echo "!{draft_contigs}\t!{sampleId}" >> genome_paths.txt
+		echo "!{sampleId}\t!{sampleId.baseName}" >> genome_paths.txt
 		cat "!{user_input}" >> genome_paths.txt
                 '''
 	}
