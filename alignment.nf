@@ -487,12 +487,8 @@ else if (params.draft && params.user_genome_paths ) {
                 '''
                 #!/bin/sh
                 echo "!{genome}\t!{genome.baseName}" > genome_paths.txt
-		
-                for d in "!{sampleId}";
-                do
-                        echo "/${d}\t${d.baseName}" >> genome_paths.txt
-                done
-		
+		echo "!{sampleId.join(\t)}" >> genome_paths.txt
+  
 		cat "!{user_input}" >> genome_paths.txt
                 '''
 	}
