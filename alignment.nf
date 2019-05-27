@@ -491,24 +491,7 @@ else if (params.draft && params.user_genome_paths ) {
 		cat "!{user_input}" >> genome_paths.txt
                 '''
 	}
-	results
-    .toSortedList { entry -> entry[0] }
-    .map { allPairs -> allPairs.collect{ chr, file -> file } }
-    .set { res } 
-process merge {
-publishDir "${params.alignment_out_dir}/KL_merge_test", mode: "copy"
-
-   input:
-   file(f) from res
-
-   output:
-   file 'merged.txt'
-
-   script:
-   """
-   cat ${f} > merged.txt
-   """
-}
+	
 }
 
 
