@@ -481,14 +481,13 @@ else if (params.draft && params.user_genome_paths ) {
   
                 output:
                 file("genome_paths.txt") into genome_config
-		set filepath, file("filepath${filepath}.txt") into results
 
 		
                 shell:
                 '''
                 #!/bin/sh
                 echo "!{genome}\t!{genome.baseName}" > genome_paths.txt
-		echo "!{filepath}" >  "filepath!{filepath}.txt"  
+		echo "!{filepath}" >>  genome_paths.txt 
 		cat "!{user_input}" >> genome_paths.txt
                 '''
 	}
