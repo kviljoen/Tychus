@@ -118,10 +118,9 @@ if( params.user_genome_paths) {
 }
 
 if( params.draft ) {
-	Channel
-        	.fromFilePairs(params.draft, flat: true)
-		.ifEmpty { exit 1, "Draft genome(s) could not be found: ${params.draft}" }
-        	.set { draft_genomes }
+        draft_path = params.draft.substring(0, params.draft.lastIndexOf("/"))
+	draft_genomes = Channel.fromPath(params.draft).toSortedList()
+        if( !draft_genomes.size() == 0 ) exit 1, "Draft genome file(s) could not be found: ${params.draft}"
 }
 
 
@@ -476,7 +475,7 @@ else if (params.draft && params.user_genome_paths ) {
        		.into{user_genome_config}
 		
 		input:
-                set sampleId, file(draft_contigs) from draft_genomes
+                set draft from draft_genomes
 		file user_input from user_genome_config
   
                 output:
@@ -487,7 +486,12 @@ else if (params.draft && params.user_genome_paths ) {
                 '''
                 #!/bin/sh
                 echo "!{genome}\t!{genome.baseName}" > genome_paths.txt
-		echo "!{draft_contigs}\t!{sampleId}" >> genome_paths.txt
+		
+                for d in !{draft};
+                do
+                        echo "!{draft_path}/${d}\t${d%.*}" >> genome_paths.txt
+                done
+		
 		cat "!{user_input}" >> genome_paths.txt
                 '''
 	}
