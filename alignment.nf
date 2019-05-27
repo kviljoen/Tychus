@@ -486,7 +486,7 @@ else if (params.draft && params.user_genome_paths ) {
                 #!/bin/sh
                 echo "!{genome}\t!{genome.baseName}" > genome_paths.txt
 		
-		for sample in "!{draft_filepath.collect.join('/t') }";do
+		for sample in "!{draft_filepath.collect() }";do
     		echo "\${sample}" >> genome_paths.txt
 		done
 		
