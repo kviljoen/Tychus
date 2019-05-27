@@ -474,7 +474,6 @@ else if (params.draft && params.user_genome_paths ) {
        		.into{user_genome_config}
 		
 		input:
-		val draft_filepath from user_draft_genomes.collect()
 		file user_input from user_genome_config
   
                 output:
@@ -483,12 +482,10 @@ else if (params.draft && params.user_genome_paths ) {
 		
                 shell:
                 '''
-                #!/bin/sh
+                #!/bin/bash
                 echo "!{genome}\t!{genome.baseName}" > genome_paths.txt
 		
-		for sample in "!{draft_filepath.collect() }";do
-    		echo "\${sample}" >> genome_paths.txt
-		done
+		paste -d '\t' < (ls -1 "!{user_draft_genomes}"/*integrated_contigs.fa ) < (for i in `ls -1 "!{user_draft_genomes}"/*integrated_contigs.fa`; do basename=$(basename $i}); echo ${basename%.fa*}; done) >> genome_paths.txt
 		
 		cat "!{user_input}" >> genome_paths.txt
                 '''
