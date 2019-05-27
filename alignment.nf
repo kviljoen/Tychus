@@ -445,7 +445,7 @@ if( params.draft && !params.user_genome_paths ) {
 		echo true
 
 		input:
-                file draft from draft_genomes
+                file draft from user_draft_genomes
 
                 output:
                 file("genome_paths.txt") into genome_config
