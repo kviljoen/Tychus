@@ -118,7 +118,7 @@ if( params.user_genome_paths) {
 }
 
 if( params.draft ) {
-	Channel.fromPath(params.draft).collect()
+	Channel.fromPath(params.draft).toList()
 	.ifEmpty { exit 1, "Draft contigs could not be found: ${params.draft}" }
 	.set{user_draft_genomes}
 
@@ -476,22 +476,40 @@ else if (params.draft && params.user_genome_paths ) {
        		.into{user_genome_config}
 		
 		input:
-                set sampleId, file(draft_contigs) from user_draft_genomes.collect()
+                each filepath from user_draft_genomes
 		file user_input from user_genome_config
   
                 output:
                 file("genome_paths.txt") into genome_config
+		set filepath, file("filepath${filepath}.txt") into results
 
 		
                 shell:
                 '''
                 #!/bin/sh
                 echo "!{genome}\t!{genome.baseName}" > genome_paths.txt
-		echo "!{sampleId.join(\t)}" >> genome_paths.txt
-  
+		echo "!{filepath}" >  "filepath!{filepath}.txt"  
 		cat "!{user_input}" >> genome_paths.txt
                 '''
 	}
+	results
+    .toSortedList { entry -> entry[0] }
+    .map { allPairs -> allPairs.collect{ chr, file -> file } }
+    .set { res } 
+process merge {
+publishDir "${params.alignment_out_dir}/KL_merge_test", mode: "copy"
+
+   input:
+   file(f) from res
+
+   output:
+   file 'merged.txt'
+
+   script:
+   """
+   cat ${f} > merged.txt
+   """
+}
 }
 
 
