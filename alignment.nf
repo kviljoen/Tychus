@@ -473,7 +473,6 @@ else if (params.draft && params.user_genome_paths ) {
        		.into{user_genome_config}
 		
 		input:
-                user_draft_genomes
 		file user_input from user_genome_config
   
                 output:
@@ -484,8 +483,7 @@ else if (params.draft && params.user_genome_paths ) {
                 '''
                 #!/bin/sh
                 echo "!{genome}\t!{genome.baseName}" > genome_paths.txt
-		paste -d '\t' <(for i in `ls -1 "!{user_draft_genomes}/*integrated_contigs.fa"`; 
-		do basename=$(basename $i}); echo ${basename%_*}; done) <(ls -1 "!{user_draft_genomes/*integrated_contigs.fa"} ) >> genome_paths.txt
+		ppaste -d '\t' <(ls -1 "!{user_draft_genomes}" ) <(for i in `ls -1 "!{user_draft_genomes}"`; do basename=$(basename $i}); echo ${basename%_*}; done) >> genome_paths.txt
 		cat "!{user_input}" >> genome_paths.txt
                 '''
 	}
