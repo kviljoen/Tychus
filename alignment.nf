@@ -119,7 +119,7 @@ if( params.user_genome_paths) {
 
 if( params.draft ) {
 	Channel
-        	.fromFilePairs(params.draft)
+        	.fromFilePairs(params.draft, flat: true)
 		.ifEmpty { exit 1, "Draft genome(s) could not be found: ${params.draft}" }
         	.set { draft_genomes }
 }
