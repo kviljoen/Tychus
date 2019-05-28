@@ -468,13 +468,6 @@ else if (params.draft && params.user_genome_paths ) {
 		process kSNPDraftAndExtraReferenceConfiguration {
 		publishDir "${params.alignment_out_dir}/KL_test", mode: "copy"
 
-		echo true
-
-		Channel.fromPath(user_genome_paths)
-       		.into{user_genome_config}
-		
-		input:
-		file user_input from user_genome_config
   
                 output:
                 file("genome_paths.txt") into genome_config
@@ -487,7 +480,7 @@ else if (params.draft && params.user_genome_paths ) {
 		for file in !{user_draft_genomes}; do
  		echo "$file\t$(basename $file .fa)"
 		done >> genome_paths.txt
-		cat "!{user_input}" >> genome_paths.txt
+		cat !{user_genome_paths} >> genome_paths.txt
                 '''
 	}
 	
@@ -508,24 +501,14 @@ else {
 	 * Create configuration file for kSNP3 using the user-input reference genome
 	 */
 	process kSNPGenomeConfiguration {
-		echo true
-		//storeDir 'temporary_files'
-		
-		//ref_genome = file(params.genome)
-		
-		input:
-		file genome
 
 		output:
 		file("genome_paths.txt") into genome_config
-		file("$genome") into kchooser_genome
 
 		shell:
 		'''
 		#!/bin/sh
-		base=`echo !{genome} | cut -f1 -d '.'`
-		fp=`readlink !{genome}`
-		echo "${fp}\t${base}" > genome_paths.txt
+	        echo "!{genome}\t!{genome.baseName}" > genome_paths.txt
 		'''
 	}
 }
