@@ -491,8 +491,21 @@ else if (params.user_genome_paths && !params.draft) {
 	/*
 	 * Use pre-made user-specified genome reference file for kSNP3 (useful when needing to add additional reference species to referenc tree)
 	 */
-	Channel.fromPath(user_genome_paths)
-       .into{genome_config}
+	 process kSNPExtraReferenceConfiguration {
+		publishDir "${params.alignment_out_dir}/KL_test_extra_refs", mode: "copy"
+
+  
+                output:
+                file("genome_paths.txt") into genome_config
+
+		
+                shell:
+                '''
+                #!/bin/sh
+                echo "!{genome}\t!{genome.baseName}" > genome_paths.txt
+		cat !{user_genome_paths} >> genome_paths.txt
+                '''
+	}
 
 }
 
