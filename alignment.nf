@@ -118,9 +118,10 @@ if( params.user_genome_paths) {
 }
 
 if( params.draft ) {
-	Channel.fromPath(params.draft)
-	.set { user_draft_genomes }
+	user_draft_genomes= params.draft
+        if( !user_draft_genomes.exists() ) exit 1, "User-defined draft(s) path could not be found: ${params.draft}"
 }
+
 
 
 // Header log info
@@ -482,11 +483,11 @@ else if (params.draft && params.user_genome_paths ) {
 		
                 shell:
                 '''
-                #!/bin/bash
+                #!/bin/sh
                 echo "!{genome}\t!{genome.baseName}" > genome_paths.txt
-		
-		paste -d '\t' < (ls -1 "!{user_draft_genomes}"/*integrated_contigs.fa ) < (for i in `ls -1 "!{user_draft_genomes}"/*integrated_contigs.fa`; do basename=$(basename $i}); echo ${basename%.fa*}; done) >> genome_paths.txt
-		
+		for file in !{user_draft_genomes}; do
+ 		echo "$file\t$(basename $file .fa)"
+		done >> genome_paths.txt
 		cat "!{user_input}" >> genome_paths.txt
                 '''
 	}
