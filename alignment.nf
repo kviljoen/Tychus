@@ -119,7 +119,6 @@ if( params.user_genome_paths) {
 
 if( params.draft ) {
 	user_draft_genomes= params.draft
-        if( !user_draft_genomes.exists() ) exit 1, "User-defined draft(s) path could not be found: ${params.draft}"
 }
 
 
