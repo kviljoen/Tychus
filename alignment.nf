@@ -477,7 +477,7 @@ else if (params.draft && params.user_genome_paths ) {
                 '''
                 #!/bin/sh
                 echo "!{genome}\t!{genome.baseName}" > genome_paths.txt
-		for file in !{user_draft_genomes}; do
+		for file in !{params.draft}; do
  		echo "$file\t$(basename $file .fa)"
 		done >> genome_paths.txt
 		cat !{user_genome_paths} >> genome_paths.txt
