@@ -117,10 +117,6 @@ if( params.user_genome_paths) {
         if( !user_genome_paths.exists() ) exit 1, "User-defined genome paths file could not be found: ${params.user_genome_paths}"
 }
 
-if( params.draft ) {
-	if( !params.draft.exists() ) exit 1, "User-defined draft genome paths file could not be found: ${params.draft}"
-
-}
 
 
 // Header log info
