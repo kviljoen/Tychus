@@ -118,7 +118,9 @@ if( params.user_genome_paths) {
 }
 
 if( params.draft ) {
-	user_draft_genomes= params.draft
+	draft = file(params.draft)
+	if( !draft.exists() ) exit 1, "User-defined draft genome paths file could not be found: ${params.draft}"
+
 }
 
 
