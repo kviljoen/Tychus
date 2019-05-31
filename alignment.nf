@@ -117,12 +117,10 @@ if( params.user_genome_paths) {
         if( !user_genome_paths.exists() ) exit 1, "User-defined genome paths file could not be found: ${params.user_genome_paths}"
 }
 
-//if( params.draft ) {
-//	draft = file(params.draft)
-//	if( !draft.exists() ) exit 1, "User-defined draft genome paths file could not be found: ${params.draft}"
-//
-//}
-params.draft = "/ceph/cbio/users/katie/Nicol/Ps_assembly/IntegratedContigs/*integrated_contigs.fa"
+if( params.draft ) {
+	if( !params.draft.exists() ) exit 1, "User-defined draft genome paths file could not be found: ${params.draft}"
+
+}
 
 
 // Header log info
@@ -474,7 +472,6 @@ else if (params.draft && params.user_genome_paths ) {
                 output:
                 file("genome_paths.txt") into genome_config
 
-		
                 shell:
                 '''
                 #!/bin/sh
