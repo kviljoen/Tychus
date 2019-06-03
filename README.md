@@ -219,7 +219,7 @@ kSNP Options:
     --ML              BOOL		Estimate maximum likelihood tree
     --NJ              BOOL		Estimate neighbor joining tree
     --min_frac        DECIMAL	Minimum fraction of genomes with locus
-    --draft           DIR		Path to the FASTA formatted draft genomes
+    --draft           DIR		Path to the FASTA formatted draft contigs created with assembly.nf
 
 Figtree Options: 
     --JPEG            BOOL		Convert newick tree to annotated JPEG
