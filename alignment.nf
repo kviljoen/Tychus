@@ -494,7 +494,7 @@ else if (params.user_genome_paths && !params.draft) {
                 shell:
                 '''
                 #!/bin/sh
-		cat !{user_genome_paths} >> genome_paths.txt
+		cat !{user_genome_paths} > genome_paths.txt
                 '''
 	}
 
