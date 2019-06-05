@@ -572,7 +572,6 @@ phylogenetic_trees.flatten()
  */
 process ConvertNewickToPDF {
 	publishDir "${params.alignment_out_dir}/SNPsAndPhylogenies/TreeImages", mode: "move"
-	cache 'deep'
 	
 	input:
 	file tree from trees
