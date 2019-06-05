@@ -439,8 +439,6 @@ if( params.draft && !params.user_genome_paths ) {
 	process kSNPDraftAndGenomeConfiguration {
 		echo true
 
-		input:
-                file draft from user_draft_genomes
 
                 output:
                 file("genome_paths.txt") into genome_config
