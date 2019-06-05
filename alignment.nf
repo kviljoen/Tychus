@@ -366,7 +366,7 @@ if( params.plasmid_db ) { //KL: downloaded prebuilt from plsdb
 	}
 
 	process PlasmidResistome {
-        	publishDir "${params.alignment_out_dir}/Resistome", mode: "copy"
+        	publishDir "${params.alignment_out_dir}/Resistome", mode: "copy", overwrite: false
         	tag { dataset_id }
 		cache 'deep'
 		
