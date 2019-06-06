@@ -439,7 +439,10 @@ if( params.draft && !params.user_genome_paths ) {
 	process kSNPDraftAndGenomeConfiguration {
 		echo true
 
-
+		input:
+		params.draft
+		genome
+		
                 output:
                 file("genome_paths.txt") into genome_config
 
@@ -461,7 +464,11 @@ else if (params.draft && params.user_genome_paths ) {
 		process kSNPDraftAndExtraReferenceConfiguration {
 		publishDir "${params.alignment_out_dir}/KL_test", mode: "copy"
 
-  
+  		input:
+		params.draft
+		genome
+		user_genome_paths
+		
                 output:
                 file("genome_paths.txt") into genome_config
 
@@ -487,7 +494,7 @@ else if (params.user_genome_paths && !params.draft) {
 		publishDir "${params.alignment_out_dir}/KL_extra_refs", mode: "copy"
 
   		input:
-		file fasta_list from user_genome_paths
+		user_genome_paths
 		
                 output:
                 file("genome_paths.txt") into genome_config
@@ -496,7 +503,7 @@ else if (params.user_genome_paths && !params.draft) {
                 shell:
                 '''
                 #!/bin/sh
-		cat !{fasta_list} > genome_paths.txt
+		cat !{user_genome_paths > genome_paths.txt
                 '''
 	}
 
@@ -509,6 +516,9 @@ else {
 	 */
 	process kSNPGenomeConfiguration {
 
+		input:
+		genome
+		
 		output:
 		file("genome_paths.txt") into genome_config
 
