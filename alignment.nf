@@ -486,7 +486,9 @@ else if (params.user_genome_paths && !params.draft) {
 	 process kSNPExtraReferenceConfiguration {
 		publishDir "${params.alignment_out_dir}/KL_extra_refs", mode: "copy"
 
-  
+  		input:
+		file fasta_list from user_genome_paths
+		
                 output:
                 file("genome_paths.txt") into genome_config
 
@@ -494,7 +496,7 @@ else if (params.user_genome_paths && !params.draft) {
                 shell:
                 '''
                 #!/bin/sh
-		cat !{user_genome_paths} > genome_paths.txt
+		cat !{fasta_list} > genome_paths.txt
                 '''
 	}
 
