@@ -517,7 +517,7 @@ else {
 	process kSNPGenomeConfiguration {
 
 		input:
-		file ref_genome from genome
+		genome
 		
 		output:
 		file("genome_paths.txt") into genome_config
@@ -525,7 +525,7 @@ else {
 		shell:
 		'''
 		#!/bin/sh
-	        echo "!{ref_genome}\t!{ref_genome.baseName}" > genome_paths.txt
+	        echo "!{genome}\t!{genome.baseName}" > genome_paths.txt
 		'''
 	}
 }
