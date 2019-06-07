@@ -465,9 +465,9 @@ else if (params.draft && params.user_genome_paths ) {
 		publishDir "${params.alignment_out_dir}/KL_test", mode: "copy"
 
   		input:
-		params.draft
-		genome
-		user_genome_paths
+		file draft from params.draft
+		file ref_genome from genome
+		file user_lislt user_genome_paths
 		
                 output:
                 file("genome_paths.txt") into genome_config
@@ -475,11 +475,11 @@ else if (params.draft && params.user_genome_paths ) {
                 shell:
                 '''
                 #!/bin/sh
-                echo "!{genome}\t!{genome.baseName}" > genome_paths.txt
-		for i in !{params.draft}; do
+                echo "!{ref_genome}\t!{ref_genome.baseName}" > genome_paths.txt
+		for i in !{draft}; do
  		echo "$i\t$(basename $i .fa)"
 		done >> genome_paths.txt
-		cat !{user_genome_paths} >> genome_paths.txt
+		cat !{user_list} >> genome_paths.txt
                 '''
 	}
 	
@@ -517,7 +517,7 @@ else {
 	process kSNPGenomeConfiguration {
 
 		input:
-		genome
+		file ref_genome from genome
 		
 		output:
 		file("genome_paths.txt") into genome_config
@@ -525,7 +525,7 @@ else {
 		shell:
 		'''
 		#!/bin/sh
-	        echo "!{genome}\t!{genome.baseName}" > genome_paths.txt
+	        echo "!{ref_genome}\t!{ref_genome.baseName}" > genome_paths.txt
 		'''
 	}
 }
