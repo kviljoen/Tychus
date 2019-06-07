@@ -439,9 +439,6 @@ if( params.draft && !params.user_genome_paths ) {
 	process kSNPDraftAndGenomeConfiguration {
 		echo true
 
-		input:
-		params.draft
-		genome
 		
                 output:
                 file("genome_paths.txt") into genome_config
@@ -464,10 +461,6 @@ else if (params.draft && params.user_genome_paths ) {
 		process kSNPDraftAndExtraReferenceConfiguration {
 		publishDir "${params.alignment_out_dir}/KL_test", mode: "copy"
 
-  		input:
-		file draft from params.draft
-		file ref_genome from genome
-		file user_lislt user_genome_paths
 		
                 output:
                 file("genome_paths.txt") into genome_config
@@ -475,11 +468,11 @@ else if (params.draft && params.user_genome_paths ) {
                 shell:
                 '''
                 #!/bin/sh
-                echo "!{ref_genome}\t!{ref_genome.baseName}" > genome_paths.txt
-		for i in !{draft}; do
+                echo "!{genome}\t!{genome.baseName}" > genome_paths.txt
+		for i in !{params.draft}; do
  		echo "$i\t$(basename $i .fa)"
 		done >> genome_paths.txt
-		cat !{user_list} >> genome_paths.txt
+		cat !{user_genome_paths} >> genome_paths.txt
                 '''
 	}
 	
@@ -493,8 +486,6 @@ else if (params.user_genome_paths && !params.draft) {
 	 process kSNPExtraReferenceConfiguration {
 		publishDir "${params.alignment_out_dir}/KL_extra_refs", mode: "copy"
 
-  		input:
-		file user_list from user_genome_paths
 		
                 output:
                 file("genome_paths.txt") into genome_config
@@ -503,7 +494,7 @@ else if (params.user_genome_paths && !params.draft) {
                 shell:
                 '''
                 #!/bin/sh
-		cat !{user_list} > genome_paths.txt
+		cat !{user_genome_paths} > genome_paths.txt
                 '''
 	}
 
@@ -515,10 +506,7 @@ else {
 	 * Create configuration file for kSNP3 using the user-input reference genome
 	 */
 	process kSNPGenomeConfiguration {
-		cache 'deep'
-		
-		input:
-		genome
+
 		
 		output:
 		file("genome_paths.txt") into genome_config
