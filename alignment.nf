@@ -439,6 +439,12 @@ if( params.draft && !params.user_genome_paths ) {
 	process kSNPDraftAndGenomeConfiguration {
 		echo true
 
+		//This (otherwise useless) input statement was included to make sure this process is rerun when
+		//using -restart with a new --genome or -draft input. If however you use !{refresh_genome} etc you only get the 
+		//file name and not the full path + filename as we would like
+		input: 
+		file refresh_genome from file(params.genome)
+		file draft_files from file(params.draft)
 		
                 output:
                 file("genome_paths.txt") into genome_config
@@ -461,7 +467,14 @@ else if (params.draft && params.user_genome_paths ) {
 		process kSNPDraftAndExtraReferenceConfiguration {
 		publishDir "${params.alignment_out_dir}/KL_test", mode: "copy"
 
-		
+		//This (otherwise useless) input statement was included to make sure this process is rerun when
+		//using -restart with a new --user_genome_paths --genome or -draft input. If however you use !{refresh_genome} etc you only get the 
+		//file name and not the full path + filename as we would like
+		input: 
+		file refresh_user_genome from file(params.user_genome_paths)
+		file refresh_genome from file(params.genome)
+		file draft_files from file(params.draft)
+
                 output:
                 file("genome_paths.txt") into genome_config
 
@@ -486,8 +499,13 @@ else if (params.user_genome_paths && !params.draft) {
 	 process kSNPExtraReferenceConfiguration {
 		publishDir "${params.alignment_out_dir}/KL_extra_refs", mode: "copy"
 
+		//This (otherwise useless) input statement was included to make sure this process is rerun when
+		//using -restart with a new --user_genome_paths input. If however you use !{refresh_user_genome} you only get the 
+		//file name and not the full path + filename as we would like
 		
-                output:
+		input: file refresh_user_genome from file(params.user_genome_paths)
+                
+		output:
                 file("genome_paths.txt") into genome_config
 
 		
@@ -507,7 +525,12 @@ else {
 	 */
 	process kSNPGenomeConfiguration {
 
+		//This (otherwise useless) input statement was included to make sure this process is rerun when
+		//using -restart with a new --genome input. If however you use !{refresh_genome} you only get the 
+		//file name and not the full path + filename as we would like
 		
+		input: file refresh_genome from file(params.genome)
+                
 		output:
 		file("genome_paths.txt") into genome_config
 
