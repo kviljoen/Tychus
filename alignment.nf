@@ -473,7 +473,6 @@ else if (params.draft && params.user_genome_paths ) {
 		input: 
 		file refresh_user_genome from file(params.user_genome_paths)
 		file refresh_genome from file(params.genome)
-		file draft_files from file(params.draft)
 
                 output:
                 file("genome_paths.txt") into genome_config
