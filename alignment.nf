@@ -33,12 +33,12 @@ if(params.help) {
 	log.info '    nextflow alignment.nf -profile alignment [options]'
 	log.info ''
 	log.info 'General Options: '
-	log.info '    --read_pairs      DIR		Directory of paired FASTQ files'
+	log.info '    --read_pairs      DIR		Directory of paired FASTQ files. NB must be enclosed in quotes with glob pattern'
 	log.info '    --genome          FILE		Path to the FASTA formatted reference database'
 	log.info '    --amr_db          FILE		Path to the (single line) FASTA formatted resistance database'
 	log.info '    --vf_db           FILE		Path to the (single line) FASTA formatted virulence database'
 	log.info '    --plasmid_db      FILE		Path to the (single line) FASTA formatted plasmid database'
-	log.info '    --draft           FILE		Path to the FASTA formatted draft contigs created with assembly.nf'
+	log.info '    --draft           FILE		Path to the FASTA formatted draft contigs created with assembly.nf NB must be enclosed in quotes with glob pattern'
 	log.info '    --user_genome_paths FILE  Path to file specifying reference genomes (in addition to that specified by --genome) for inclusion in the phylogenetic SNP tree. See example file ('fasta_list') in this repo.'
 	log.info '    --threads         INT		Number of threads to use for each process'
 	log.info '    --alignment_out_dir         DIR		Directory to write output files to'
@@ -473,7 +473,8 @@ else if (params.draft && params.user_genome_paths ) {
 		input: 
 		file refresh_user_genome from file(params.user_genome_paths)
 		file refresh_genome from file(params.genome)
-
+		file refresh_draft from file(params.draft)
+		
                 output:
                 file("genome_paths.txt") into genome_config
 
