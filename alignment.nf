@@ -516,8 +516,8 @@ else {
 	 * Create configuration file for kSNP3 using the user-input reference genome
 	 */
 	process kSNPGenomeConfiguration {
-
-                
+		cache: false
+		
 		output:
 		file("genome_paths.txt") into genome_config
 
