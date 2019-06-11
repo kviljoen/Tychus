@@ -438,7 +438,7 @@ if( params.draft && !params.user_genome_paths ) {
 	 */
 	process kSNPDraftAndGenomeConfiguration {
 		echo true
-
+		cache false
 		
                 output:
                 file("genome_paths.txt") into genome_config
@@ -460,12 +460,7 @@ if( params.draft && !params.user_genome_paths ) {
 else if (params.draft && params.user_genome_paths ) {
 		process kSNPDraftAndExtraReferenceConfiguration {
 		publishDir "${params.alignment_out_dir}/KL_test", mode: "copy"
-
-		//This (otherwise useless) input statement was included to make sure this process is rerun when
-		//using -restart with a new --user_genome_paths If however you use !{refresh_user_genome} etc you only get the 
-		//file name and not the full path + filename as we would like
-		input: 
-		file refresh_user_genome from file(params.user_genome_paths)
+		cache false
 		
                 output:
                 file("genome_paths.txt") into genome_config
@@ -490,12 +485,7 @@ else if (params.user_genome_paths && !params.draft) {
 	 */
 	 process kSNPExtraReferenceConfiguration {
 		publishDir "${params.alignment_out_dir}/KL_extra_refs", mode: "copy"
-
-		//This (otherwise useless) input statement was included to make sure this process is rerun when
-		//using -restart with a new --user_genome_paths input. If however you use !{refresh_user_genome} you only get the 
-		//file name and not the full path + filename as we would like
-		
-		input: file refresh_user_genome from file(params.user_genome_paths)
+		cache false
                 
 		output:
                 file("genome_paths.txt") into genome_config
