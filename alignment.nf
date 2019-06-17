@@ -558,6 +558,7 @@ process BuildPhylogenies {
 	mkdir SNPs
 	mv kSNP3_results/*.tre Trees
 	mv kSNP3_results/* SNPs
+	rm -rf !{params.work_dir}
 	'''
 }
 
