@@ -424,7 +424,7 @@ process BuildConsensusSequence {
 	file("${dataset_id}_in_list.txt") into ksnp3_configuration
 
 	"""
-	freebayes -p 1 -f ${genome} $bam | bgzip -c > ${dataset_id}_genome_variants.vcf.gz
+	freebayes -p 1 -C ${params.min_alt_count} -f ${genome} $bam | bgzip -c > ${dataset_id}_genome_variants.vcf.gz
 	tabix ${dataset_id}_genome_variants.vcf.gz
 	cat $genome | bcftools consensus ${dataset_id}_genome_variants.vcf.gz > ${dataset_id}_consensus.fa
 	echo -e "$params.alignment_out_dir/Consensus/${dataset_id}_consensus.fa\t$dataset_id" >> ${dataset_id}_in_list.txt
