@@ -181,6 +181,7 @@ process BuildGenomeIndex {
  * Remove adapter sequences and low quality base pairs with Trimmomatic
  */
 process RunQC {
+
         publishDir "${params.alignment_out_dir}/Preprocessing", mode: 'copy',
             saveAs: {filename ->
                 if (!params.saveTrimmed && filename == "where_are_my_files.txt") filename
@@ -190,6 +191,8 @@ process RunQC {
 	tag { dataset_id }
 	cache 'deep'
 	
+
+
         input:
         set dataset_id, file(forward), file(reverse) from trimmomatic_read_pairs
 	file wherearemyfiles from ch_where_trimmomatic.collect()
@@ -229,10 +232,12 @@ if( params.amr_db ) {
          * Align reads to resistance database with Bowtie2
          */
 	process AMRAlignment {
+
         	publishDir "${params.alignment_out_dir}/Alignment", mode: "copy", pattern: "*.bam"
 		tag { dataset_id }
 		cache 'deep'
 		
+
         	input:
         	set dataset_id, file(forward), file(reverse) from amr_read_pairs
         	file index from amr_index
@@ -248,7 +253,9 @@ if( params.amr_db ) {
 	}
 
 	process AMRResistome {
+
         	publishDir "${params.alignment_out_dir}/Resistome", mode: "copy", overwrite: false
+
         	tag { dataset_id }
 		cache 'deep'
 		
@@ -288,10 +295,11 @@ if( params.vf_db ) {
          * Align reads to virulence factor database with Bowtie2
          */
 	process VFAlignment {
+
         	publishDir "${params.alignment_out_dir}/Alignment", mode: "copy", pattern: "*.bam"
 		tag { dataset_id }
 		cache 'deep'
-		
+
         	input:
         	set dataset_id, file(forward), file(reverse) from vf_read_pairs
         	file index from vf_index
@@ -307,7 +315,9 @@ if( params.vf_db ) {
 	}
 
 	process VFResistome {
+
         	publishDir "${params.alignment_out_dir}/Resistome", mode: "copy"
+
         	tag { dataset_id }
 		cache 'deep'
 		
@@ -347,7 +357,9 @@ if( params.plasmid_db ) { //KL: downloaded prebuilt from plsdb
          * Align reads to plasmid database with Bowtie2
          */
 	process PlasmidAlignment {
+
         	publishDir "${params.alignment_out_dir}/Alignment", mode: "copy", pattern: "*.bam"
+
         	tag { dataset_id }
 		cache 'deep'
 		
@@ -366,7 +378,9 @@ if( params.plasmid_db ) { //KL: downloaded prebuilt from plsdb
 	}
 
 	process PlasmidResistome {
+
         	publishDir "${params.alignment_out_dir}/Resistome", mode: "copy", overwrite: false
+
         	tag { dataset_id }
 		cache 'deep'
 		
@@ -387,7 +401,9 @@ if( params.plasmid_db ) { //KL: downloaded prebuilt from plsdb
  * Align reads to reference genome with Bowtie2
  */
 process GenomeAlignment {
+
 	publishDir "${params.alignment_out_dir}/Alignment", mode: "copy", pattern: "*.bam"
+
 	tag { dataset_id }
 	cache 'deep'
 	
@@ -411,6 +427,7 @@ process GenomeAlignment {
  */
 process BuildConsensusSequence {
 	tag { dataset_id }
+
 	publishDir "${params.alignment_out_dir}/Consensus", mode: "copy"
 	cache 'deep'
 	
@@ -523,7 +540,9 @@ else {
  * Build phylogenies with kSNP3
  */
 process BuildPhylogenies {
+
 	publishDir "${params.alignment_out_dir}/SNPsAndPhylogenies", mode: "copy"
+
 	tag { "ConfigurationFiles" }
 	
 	input:
@@ -573,8 +592,9 @@ phylogenetic_trees.flatten()
  * Build phylogenetic trees with Figtree
  */
 process ConvertNewickToPDF {
+
 	publishDir "${params.alignment_out_dir}/SNPsAndPhylogenies/TreeImages", mode: "move"
-	
+
 	input:
 	file tree from trees
 
