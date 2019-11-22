@@ -21,7 +21,7 @@ RUN apt-get update && apt-get install -y \
 	tar \
 	zlib1g-dev \
   	libncurses5-dev \
-  	perl-list-util
+  	liblist-moreutils-perl
  
 
 #########################################################################################################
