@@ -19,7 +19,7 @@ cmake \
         unzip \
         python \
 	tar \
-	zlib1g-dev
+	zlib1g-dev \
   libncurses5-dev
  
 
