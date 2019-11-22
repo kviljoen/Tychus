@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y \
         aufs-tools \
         automake \
         build-essential \
-cmake \
+	cmake \
         wget \
         git \
         libbz2-dev \
@@ -20,7 +20,8 @@ cmake \
         python \
 	tar \
 	zlib1g-dev \
-  libncurses5-dev
+  	libncurses5-dev \
+  	perl-list-util
  
 
 #########################################################################################################
