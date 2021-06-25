@@ -293,7 +293,7 @@ $ nextflow assembly.nf -profile assembly --read_pairs "tutorial/raw_sequence_dat
 
 kSNP Operations
 ---------------
-By default, maximum likelihood (ML) trees are computed with kSNP. Although this is the `recommended` tree format to produce, you can specify the neighbor joining (NJ) method by including the `--NJ` option. Furthermore, you can enter a decimal number between 0 and 1 specifying the fraction of loci that must be present in all genomes to be included in the resulting SNP phylogeny.
+By default, maximum likelihood (ML) trees are computed with kSNP. Although this is the `recommended` tree format to produce, you can specify the neighbor joining (NJ) method by including the `--NJ` option. Furthermore, you can enter a decimal number between 0 and 1 specifying the fraction of loci that must be present in all genomes to be included in the resulting SNP phylogeny. NB kSNP3 has certain input filename requirements e.g. a filename can only have one '.' (e.g. use reference_1.fasta instead of reference.1.fasta); otherwise the user will see error: kSNP3_results no such file or directory (check the Name errors file in the working directory for details)
 ```
 $ nextflow alignment.nf -profile alignment --read_pairs "tutorial/raw_sequence_data/*_R{1,2}_001.fq.gz" --NJ --min_frac 0.85
 ```
@@ -364,6 +364,16 @@ AssemblyReport | `Contains all assembly evaulation files produced by QUAST.`
 PreProcessing | `Contains all FASTQ formatted trimmed sequence files produced by Trimmomatic.`
 
 -------
+
+Results interpretation
+============
+
+Note that the results for aligning against VF, AMR and plasmid DBs are tsv files produced by CSA, the 5 columns are:
+Level: the sampling percent alignments were taken at
+Iteration: the ith iteration of the current sample level
+Gene Id: the reference sequence having a gene fraction greater than the threshold
+Gene Fraction: the number of bases covered by the sample of alignments
+Hits: the number of alignments that had bases cover the reference sequence
 
 Dependencies
 ============
