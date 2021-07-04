@@ -22,35 +22,8 @@
  * SOFTWARE.
  */
 
-// General configuration variables
-params.pwd = "$PWD"
-params.output = "tychus_assembly_output"
-params.help = false
-params.read_pairs = "$baseDir/tutorial/raw_sequence_data/*_R{1,2}_001.fq.gz"
-params.out_dir = "$baseDir/" + params.output
-params.threads = 1
+// General configuration variables moved to nextflow.config
 
-threads = params.threads
-
-// Trimmomatic configuration variables
-params.leading = 3
-params.trailing = 3
-params.slidingwindow = "4:15"
-params.minlen = 36
-params.adapters = "TruSeq3-PE.fa"
-
-leading = params.leading
-trailing = params.trailing
-slidingwindow = params.slidingwindow
-minlen = params.minlen
-adapters = params.adapters
-
-// Prokka configuration variables
-params.genus = ""
-params.species = ""
-
-genus = params.genus
-species = params.species
 
 // Display help menu
 if(params.help) {
@@ -63,7 +36,7 @@ if(params.help) {
 	log.info 'General Options: '
 	log.info '    --read_pairs      DIR		Directory of paired FASTQ files'
 	log.info '    --threads         INT		Number of threads to use for each process'
-	log.info '    --output          DIR		Directory to write output files to'
+	log.info '    --assembly_out_dir          DIR		Directory to write output files to'
 	log.info ''
 	log.info 'Trimmomatic Options: '
 	log.info '    --leading         INT		Remove leading low quality or N bases'
@@ -79,6 +52,13 @@ if(params.help) {
 	return
 }
 
+params.name = false
+//  this has the bonus effect of catching both -name and --name
+custom_runName = params.name
+if( !(workflow.runName ==~ /[a-z]+_[a-z]+/) ){
+  custom_runName = workflow.runName
+}
+
 // Returns a tuple of read pairs in the form
 // [dataset_id, forward.fq, reverse.fq] where
 // the dataset_id is the shared prefix from
@@ -86,16 +66,59 @@ if(params.help) {
 Channel
 	.fromFilePairs(params.read_pairs, flat: true)
 	.ifEmpty { exit 1, "Read pairs could not be found: ${params.read_pairs}" }
-	.into { trimmomatic_read_pairs }
+	.set { trimmomatic_read_pairs }
+
+
+// Header log info
+log.info "==================================="
+log.info " uct-tychus "
+log.info "==================================="
+def summary = [:]
+summary['Run Name']     = custom_runName ?: workflow.runName
+summary['Reads']        = params.read_pairs
+summary['OS']		= System.getProperty("os.name")
+summary['OS.arch']	= System.getProperty("os.arch") 
+summary['OS.version']	= System.getProperty("os.version")
+summary['javaversion'] = System.getProperty("java.version") //Java Runtime Environment version
+summary['javaVMname'] = System.getProperty("java.vm.name") //Java Virtual Machine implementation name
+summary['javaVMVersion'] = System.getProperty("java.vm.version") //Java Virtual Machine implementation version
+//Gets starting time		
+sysdate = new java.util.Date() 
+summary['User']		= System.getProperty("user.name") //User's account name
+summary['Max Memory']     = params.max_memory
+summary['Max CPUs']       = params.max_cpus
+summary['Max Time']       = params.max_time
+summary['Output dir']     = params.assembly_out_dir
+summary['Working dir']    = workflow.workDir
+summary['Container']      = workflow.container
+if(workflow.revision) summary['Pipeline Release'] = workflow.revision
+summary['Current home']   = "$HOME"
+summary['Current user']   = "$USER"
+summary['Current path']   = "$PWD"
+summary['Script dir']     = workflow.projectDir
+summary['Config Profile'] = workflow.profile
+if(params.genus) {
+	summary['Genus'] = params.genus
+}
+if(params.species) {
+	summary['Species'] = params.species
+}
+if(params.email) {
+    summary['E-mail Address'] = params.email
+}
+log.info summary.collect { k,v -> "${k.padRight(15)}: $v" }.join("\n")
+log.info "========================================="
+
+
 
 /*
  * Remove adapter sequences and low quality base pairs with Trimmomatic
  */
 process RunQC {
-	publishDir "${params.out_dir}/PreProcessing", mode: "copy"
-
+	publishDir "${params.assembly_out_dir}/PreProcessing", mode: "copy"
 	tag { dataset_id }
-
+	cache 'deep'
+	
         input:
         set dataset_id, file(forward), file(reverse) from trimmomatic_read_pairs
 
@@ -103,7 +126,7 @@ process RunQC {
         set dataset_id, file("${dataset_id}_1P.fastq"), file("${dataset_id}_2P.fastq") into (abyss_read_pairs, velvet_read_pairs, spades_read_pairs, idba_read_pairs, kmer_genie_read_pairs)
 
         """
-        java -jar ${TRIMMOMATIC}/trimmomatic-0.36.jar PE -threads ${threads} $forward $reverse -baseout ${dataset_id} ILLUMINACLIP:Trimmomatic-0.36/adapters/${adapters}:2:30:10:3:TRUE LEADING:${leading} TRAILING:${trailing} SLIDINGWINDOW:${slidingwindow} MINLEN:${minlen}
+        java -jar ${TRIMMOMATIC}/trimmomatic-0.36.jar PE -threads ${task.cpus} $forward $reverse -baseout ${dataset_id} ILLUMINACLIP:Trimmomatic-0.36/adapters/${params.adapters}:2:30:10:3:TRUE LEADING:${params.leading} TRAILING:${params.trailing} SLIDINGWINDOW:${params.slidingwindow} MINLEN:${params.minlen}
         mv ${dataset_id}_1P ${dataset_id}_1P.fastq
         mv ${dataset_id}_2P ${dataset_id}_2P.fastq
         """
@@ -114,7 +137,8 @@ process RunQC {
  */
 process IdentifyBestKmer {
 	tag { dataset_id }
-
+	cache 'deep'
+	
 	input:
 	set dataset_id, file(forward), file(reverse) from kmer_genie_read_pairs
 
@@ -125,7 +149,7 @@ process IdentifyBestKmer {
 	"""
 	echo $forward > ${dataset_id}_read_pair_list.txt
 	echo $reverse >> ${dataset_id}_read_pair_list.txt
-	kmergenie "${dataset_id}_read_pair_list.txt" -t ${threads} | tail -n 1 | awk '{print \$3}' > ${dataset_id}_best-k.txt
+	kmergenie "${dataset_id}_read_pair_list.txt" -t ${task.cpus} | tail -n 1 | awk '{print \$3}' > ${dataset_id}_best-k.txt
 	cp $forward "${dataset_id}_forward_kg.fq"
 	cp $reverse "${dataset_id}_reverse_kg.fq"
 	"""
@@ -135,10 +159,10 @@ process IdentifyBestKmer {
  * Build assembly with Abyss
  */
 process BuildAbyssAssembly {
-	publishDir "${params.out_dir}/AbyssContigs", mode: "copy"
-
+	publishDir "${params.assembly_out_dir}/AbyssContigs", mode: "copy"
 	tag { dataset_id }
-
+	cache 'deep'
+	
         input:
         set dataset_id, file(forward), file(reverse) from abyss_kg_pairs
 	val best from best_abyss_kmer_results
@@ -150,7 +174,7 @@ process BuildAbyssAssembly {
 	'''
 	#!/bin/sh
 	best_kmer=`cat !{best}`
-	abyss-pe k=$best_kmer name=abyss j=!{threads} in='!{forward} !{reverse}'
+	abyss-pe k=$best_kmer name=abyss j=!{task.cpus} in='!{forward} !{reverse}'
         mv abyss-contigs.fa !{dataset_id}_abyss-contigs.fa
 	'''
 }
@@ -159,10 +183,10 @@ process BuildAbyssAssembly {
  * Build assembly with Velvet
  */
 process BuildVelvetAssembly {
-	publishDir "${params.out_dir}/VelvetContigs", mode: "copy"
-
+	publishDir "${params.assembly_out_dir}/VelvetContigs", mode: "copy"
 	tag { dataset_id }
-
+	cache 'deep'
+	
 	input:
 	set dataset_id, file(forward), file(reverse) from velvet_kg_pairs
 	val best from best_velvet_kmer_results
@@ -185,9 +209,9 @@ process BuildVelvetAssembly {
  * Build assembly with SPAdes
  */
 process BuildSpadesAssembly {
-	publishDir "${params.out_dir}/SPadesContigs", mode: "copy"
-	
+	publishDir "${params.assembly_out_dir}/SPadesContigs", mode: "copy"
 	tag { dataset_id }
+	cache 'deep'
 
 	input:
 	set dataset_id, file(forward), file(reverse) from spades_read_pairs
@@ -196,7 +220,7 @@ process BuildSpadesAssembly {
 	set dataset_id, file("${dataset_id}_spades-contigs.fa") into (spades_assembly_results, spades_assembly_quast_contigs)
 
 	"""
-	spades.py --pe1-1 ${forward} --pe1-2 ${reverse} -t ${threads} -o spades_output
+	spades.py --pe1-1 ${forward} --pe1-2 ${reverse} -t ${task.cpus} -o spades_output
 	mv spades_output/contigs.fasta ${dataset_id}_spades-contigs.fa
 	"""
 }
@@ -205,10 +229,10 @@ process BuildSpadesAssembly {
  * Build assembly with IDBA-UD
  */
 process BuildIDBAAssembly {
-	publishDir "${params.out_dir}/IDBAContigs", mode: "copy"
-
+	publishDir "${params.assembly_out_dir}/IDBAContigs", mode: "copy"
 	tag { dataset_id }
-
+	cache 'deep'
+	
 	input:
 	set dataset_id, file(forward), file(reverse) from idba_read_pairs
 
@@ -217,7 +241,7 @@ process BuildIDBAAssembly {
 
 	"""
 	fq2fa --merge --filter ${forward} ${reverse} ${dataset_id}_idba-paired-contigs.fa
-	idba_ud -r ${dataset_id}_idba-paired-contigs.fa --num_threads ${threads} -o ${dataset_id}_idba_output
+	idba_ud -r ${dataset_id}_idba-paired-contigs.fa --num_threads ${task.cpus} -o ${dataset_id}_idba_output
 	mv ${dataset_id}_idba_output/contig.fa ${dataset_id}_idba-contigs.fa	
 	"""
 }
@@ -240,17 +264,17 @@ abyss_assembly_results.concat(
 		idba_assembly_results
 	)
 	.groupTuple(sort: true, size: 4)
-	.into { grouped_assembly_contigs }
+	.set { grouped_assembly_contigs }
 	
 
 /*
  * Integrate contigs produced from each assembler with CISA
  */
 process IntegrateContigs {
-	publishDir "${params.out_dir}/IntegratedContigs", mode: "copy"
-
+	publishDir "${params.assembly_out_dir}/IntegratedContigs", mode: "copy"
 	tag { dataset_id }
-
+	cache 'deep'
+	
 	input:
 	set dataset_id, file(contigs) from grouped_assembly_contigs
 
@@ -284,9 +308,9 @@ process IntegrateContigs {
  * Annotate the CISA integrated contigs with Prokka
  */
 process AnnotateContigs {
-	publishDir "${params.out_dir}/AnnotatedContigs", mode: "copy"
-
+	publishDir "${params.assembly_out_dir}/AnnotatedContigs", mode: "copy"
 	tag { dataset_id }
+	cache 'deep'
 
 	input:
 	set dataset_id, file(cisa_contigs) from cisa_integrated_contigs
@@ -294,17 +318,16 @@ process AnnotateContigs {
 	output:
 	file("${dataset_id}.*") into prokka_annotations
 
-	shell:
-	'''
-	#!/bin/sh
-	if [ !{species} && !{genus} ]
+	"""
+	if [ -z ${params.species} ] && [ -z ${params.genus} ]
 	then
-		prokka !{cisa_contigs} --genus !{genus} --species !{species} --centre tychus --prefix !{dataset_id} --cpus !{threads} --outdir annotations
+		prokka ${cisa_contigs} --prefix ${dataset_id} --cpus ${task.cpus} --outdir annotations
 	else
-		prokka !{cisa_contigs} --prefix !{dataset_id} --cpus !{threads} --outdir annotations
+		prokka ${cisa_contigs} --genus ${params.genus} --species ${params.species} --centre tychus --prefix ${dataset_id} --cpus ${task.cpus} --outdir annotations
+
 	fi
 	mv annotations/* .
-	'''
+	"""
 }
 
 abyss_assembly_quast_contigs.concat(
@@ -314,16 +337,16 @@ abyss_assembly_quast_contigs.concat(
 		cisa_integrated_quast_contigs
         )
         .groupTuple(sort: true, size: 5)
-        .into { grouped_assembly_quast_contigs }
+        .set { grouped_assembly_quast_contigs }
 
 
 /*
  * Evaluate ALL assemblies with QUAST
  */
 process EvaluateAssemblies {
-	publishDir "${params.out_dir}/AssemblyReport", mode: "move"
-
+	publishDir "${params.assembly_out_dir}/AssemblyReport", mode: "move"
 	tag { dataset_id }
+	cache 'deep'
 
 	input:
 	set dataset_id, file(quast_contigs) from grouped_assembly_quast_contigs
@@ -334,7 +357,7 @@ process EvaluateAssemblies {
 	shell:
 	'''
 	#!/bin/sh
-	quast.py !{quast_contigs[0]} !{quast_contigs[1]} !{quast_contigs[2]} !{quast_contigs[3]} !{quast_contigs[4]} --space-efficient --threads !{threads} -o output
+	quast.py !{quast_contigs[0]} !{quast_contigs[1]} !{quast_contigs[2]} !{quast_contigs[3]} !{quast_contigs[4]} --space-efficient --threads !{params.threads} -o output
         mkdir quast_output
         find output/ -maxdepth 2 -type f | xargs mv -t quast_output
         cd quast_output
@@ -351,5 +374,5 @@ workflow.onComplete {
   	log.info "Command Line:		$workflow.commandLine"
 	log.info "Container:		$workflow.container"
 	log.info "Duration:		$workflow.duration"
-	log.info "Output Directory:	$params.out_dir"
+	log.info "Output Directory:	$params.assembly_out_dir"
 }

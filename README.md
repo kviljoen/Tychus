@@ -1,38 +1,9 @@
-<!---
-(Modelled after Will-Rowe's beautiful SEAR README https://github.com/will-rowe/SEAR/blob/master/README.md)
--->
+# ![kviljoen/Tychus](/assets/cbio_logo.png)
 
-[![Gitter chat](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/nextflow-tychus/Lobby?utm_source=share-link&utm_medium=link&utm_campaign=share-link)
-[![CircleCI status](https://circleci.com/gh/cdeanj/Tychus.png?style=shield&circle-token=8be6dead6f6181b2e3413f43f9542141a08b8381)](https://circleci.com/gh/cdeanj/Tychus)
+# UCT-Tychus: A Nextflow WGS pipeline for assembly, annotation and phylogenetics of bacterial genomes
 
-Tychus: A tool to characterize the bacterial genome.
-====================================================
+This pipeline accepts raw reads in .fastq format, performs adapter removal (Trimmomatic), followed by the a) assembly module (integrated contigs) and/or b) alignment module (SNP identification, SNP phylogenies, as well as virulence and antimicrobial gene and plasmid profiling)
 
-Table of Contents
------------------
-
-[Overview](https://github.com/Abdo-Lab/Tychus#overview)
-
-[Requirements](https://github.com/Abdo-Lab/Tychus#requirements)
-
-[Quickstart](https://github.com/Abdo-Lab/Tychus#quickstart)
-
-[Run a Test](https://github.com/Abdo-Lab/Tychus#run-a-test)
-
-[Options](https://github.com/Abdo-Lab/Tychus#pipeline-options)
-
-[Example Usage](https://github.com/Abdo-Lab/Tychus#example-usage)
-
-[Results](https://github.com/Abdo-Lab/Tychus#results)
-
-[Dependencies](https://github.com/Abdo-Lab/Tychus#dependencies)
-
-[Contact](https://github.com/Abdo-Lab/Tychus#contact)
-
------------------
-
-Overview
-========
 Tychus is a tool that allows researchers to perform massively parallel sequence data analysis with the goal of producing a high confidence and comprehensive description of the bacterial genome. Key features of the Tychus pipeline include the assembly, annotation, and phylogenetic inference of large numbers of WGS isolates in parallel using open-source bioinformatics tools and virtualization technology. The Tychus pipeline relies on two methods to characterize your bacterial sequence data.
 
 The first method is assembly based. The assembly module attempts to produce a comprehensive reconstruction of the genome by relying on the results of multiple *de novo* genome assemblies through the use of multiple assemblers. These assemblies are then used to produce a hybrid or consensus assembly with fewer and longer contigs that can be used as a draft genome for further downstream processes such as annotation, a process by which genomic features of interest are identified and appropriately labelled. Assemblies are then evaluated based on common scoring metrics, such as number of contigs, contig size, and N50.
@@ -41,7 +12,55 @@ The second method is alignment based. The alignment module attempts to produce a
 
 These two modules are not completely independent. Contigs produced from the `assembly` module can be used as input to the `alignment` module. In addition to the user-input reference genome and raw read sequences, these draft genomes can be used by the module's downstream processes to identify SNPs and build phylogenetic trees.
 
--------
+## Nextflow pipeline data flow
+In the direct acyclic graph (DAG) below, vertices represent the pipeline's processes and operators, while the edges represent the data connections (i.e. channels) between them.
+# ![kviljoen/Tychus](/assets/Tychus_assembly_DAG.svg)
+
+## Prerequisites
+
+Hardware requirements:
+
+  - 16+ gigabytes (GB) of RAM.
+  - 125+ gigabytes of hard drive (HDD) space.
+
+The Tychus pipeline is intended to be utilized on Linux servers with large amounts of RAM and disk space with multiple computing cores. The requirements listed above are a must for demonstration purposes.
+
+
+## Documentation
+
+[Overview](https://github.com/kviljoen/Tychus#overview)
+
+[Requirements](https://github.com/kviljoen/Tychus#requirements)
+
+[Quickstart](https://github.com/kviljoen/Tychus#quickstart)
+
+[Run a Test](https://github.com/kviljoen/Tychus#run-a-test)
+
+[Options](https://github.com/kviljoen/Tychus#pipeline-options)
+
+[Example Usage](https://github.com/kviljoen/Tychus#example-usage)
+
+[Results](https://github.com/kviljoen/Tychus#results)
+
+[Dependencies](https://github.com/kviljoen/Tychus#dependencies)
+
+[Contact](https://github.com/kviljoen/Tychus#contact)
+
+
+## Built With
+
+* [Nextflow](https://www.nextflow.io/)
+* [Docker](https://www.docker.com/what-docker)
+* [Singularity](https://singularity.lbl.gov/)
+
+
+## Credits
+
+The Tychus pipeline was built by Chris Dean (https://github.com/Abdo-Lab/Tychus). Please remember to cite 'Tychus: a whole genome sequencing pipeline for assembly, annotation and phylogenetics of bacterial genomes' (https://www.biorxiv.org/content/biorxiv/early/2018/03/16/283101.full.pdf) when using this pipeline. Further development to the Nextflow workflow and containerisation in Docker and Singularity for implementation specifically on UCT's HPC was done by Dr Katie Lennard, with Nextflow template inspiration and code snippets from Phil Ewels http://nf-co.re/
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
 
 Requirements
 ============
@@ -53,6 +72,15 @@ Minimum Hardware Requirements
 
 The Tychus pipeline is intended to be utilized on Linux servers with large amounts of RAM and disk space with multiple computing cores. The requirements listed above are a must for demonstration purposes.
 
+Nextflow (0.26.x or higher), all other software/tools required are contained in the (platform-independent) dockerfile, which should be converted to a singularity image for use on a cluster environment. If you are working on the UCT cluster, all necessary singularity images are specified in the uct_hex.conf profile. If you are working on another cluster environment you would need to build your own singularity image, using the Dockerfile in this repo as a starting point, specifying your own relevant working directories using ```RUN mkdir -p```
+
+There are also reference databases that need to be downloaded (if you are NOT working on the UCT cluster), these are:
+
+For the alignment module: (convert to single line FASTA-formatted if multiline)
+1. Reference genome of interest e.g. ftp://ftp.ncbi.nlm.nih.gov/genomes/genbank/bacteria/Pseudomonas_aeruginosa/reference/GCA_000006765.1_ASM676v1/GCA_000006765.1_ASM676v1_genomic.fna.gz
+2. Plasmid database e.g. https://ccb-microbe.cs.uni-saarland.de/plsdb/plasmids/download/
+3. A Virulence factor database e.g. http://www.mgc.ac.cn/VFs/download.htm
+4. A Antimicrobial resistance gene database e.g. ARG-ANNOT
 
 Software Requirements
 ---------------------
@@ -105,24 +133,19 @@ Install Tychus Pipeline
 -----------------------
 The Tychus pipeline can be pulled and installed from Github with the following command:
 ```
-$ git clone https://github.com/Abdo-Lab/Tychus.git
+$ git clone https://github.com/kviljoen/Tychus.git
 $ cd Tychus/
 ```
 
 Install Docker Images
 ---------------------
-Depending on which Tychus module you would like to run, you will need to download the appropriate Docker image in order to resolve the module's tool dependencies. These can be easilly downloaded by typing the following command(s):
-```
-$ docker pull abdolab/tychus-alignment
-$ docker pull abdolab/tychus-assembly
-```
-The download time will take between 5 and 10 minutes depending on your connection speed.
+Depending on which Tychus module you would like to run, you will need to download the appropriate Docker file in order to resolve the module's tool dependencies. Depending on your environment these will have to be built into docker or singularity images.
 
 ----------
 
 Run a Test
 ==========
-It is `recommended` that you run these tests for both the `alignment` and `assembly` modules before doing any large-scale analysis. This serves the purpose of getting you comfortable with running each Tychus module, as well as providing you with real output, which you can look back upon later when you get to the [Results](https://github.com/cdeanj/nextflow-tychus#results) section. The reads used in each test were produced with [Art](https://www.niehs.nih.gov/research/resources/software/biostatistics/art/), an artificial read simulator, and constructed with 10x-15x coverage.
+It is `recommended` that you run these tests for both the `alignment` and `assembly` modules before doing any large-scale analysis. This serves the purpose of getting you comfortable with running each Tychus module, as well as providing you with real output, which you can look back upon later when you get to the [Results](https://github.com/cdeanj/nextflow-tychus#results) section. The reads used in each test were produced with [Art](https://www.niehs.nih.gov/research/resources/software/biostatistics/art/), an artificial read simulator, and constructed with 10x-15x coverage. 
 
 Alignment Module
 ----------------
@@ -139,7 +162,7 @@ Container:			abdolab/tychus-alignment
 Duration:			2m 28s
 Output Directory:	/home/username/nextflow-tychus/my_alignment_output
 ```
-
+Please note that reference databases (amr_db, vf_db, plasmid_db) have to be in single line fasta format (as opposed to multiline fasta format) for csa to work
 Assembly Module
 ---------------
 Included in the `assembly` module is a reference to the simulated reads mentioned above. You will not need to specify the location of any reads in this example. To get started, run the following command within the `nextflow-tychus/` directory:
@@ -151,7 +174,7 @@ Since we are doing *de novo* assemblies, this could take a while, but hopefully 
 ```
 Nextflow Version:       0.23.0
 Command Line:           nextflow run assembly.nf -profile assembly --threads 2 --output my_assembly_output
-Container:              abdolab/tychus-assembly
+Container:              
 Duration:               5m 37s
 Output Directory:       /home/username/nextflow-tychus/my_assembly_output
 ```
@@ -178,11 +201,12 @@ Usage:
 General Options: 
     --read_pairs      DIR		Directory of paired FASTQ files
     --genome          FILE		Path to the FASTA formatted reference database
-    --amr_db          FILE		Path to the FASTA formatted resistance database
-    --vf_db           FILE		Path to the FASTA formatted virulence database
-    --plasmid_db      FILE		Path to the FASTA formatted plasmid database
+    --amr_db          FILE		Path to the (single line) FASTA formatted resistance database
+    --vf_db           FILE		Path to the (single line) FASTA formatted virulence database
+    --plasmid_db      FILE		Path to the (single line) FASTA formatted plasmid database
+    --user_genome_paths FILE  Path to file specifying reference genomes (in addition to that specified by --genome) for inclusion in the phylogenetic SNP tree. See example file ('fasta_list') in this repo.
     --threads         INT		Number of threads to use for each process
-    --out_dir         DIR		Directory to write output files to
+    --alignment_out_dir         DIR		Directory to write output files to
 
 Trimmomatic Options: 
     --leading         INT		Remove leading low quality or N bases
@@ -195,7 +219,7 @@ kSNP Options:
     --ML              BOOL		Estimate maximum likelihood tree
     --NJ              BOOL		Estimate neighbor joining tree
     --min_frac        DECIMAL	Minimum fraction of genomes with locus
-    --draft           DIR		Path to the FASTA formatted draft genomes
+    --draft           DIR		Path to the FASTA formatted draft contigs created with assembly.nf
 
 Figtree Options: 
     --JPEG            BOOL		Convert newick tree to annotated JPEG
@@ -220,7 +244,7 @@ Usage:
 General Options: 
     --read_pairs      DIR		Directory of paired FASTQ files
     --threads         INT       Number of threads to use for each process
-    --output          DIR       Directory to write output files to
+    --assembly_out_dir          DIR       Directory to write output files to
 
 Trimmomatic Options: 
     --leading         INT		Remove leading low quality or N bases
@@ -269,7 +293,7 @@ $ nextflow assembly.nf -profile assembly --read_pairs "tutorial/raw_sequence_dat
 
 kSNP Operations
 ---------------
-By default, maximum likelihood (ML) trees are computed with kSNP. Although this is the `recommended` tree format to produce, you can specify the neighbor joining (NJ) method by including the `--NJ` option. Furthermore, you can enter a decimal number between 0 and 1 specifying the fraction of loci that must be present in all genomes to be included in the resulting SNP phylogeny.
+By default, maximum likelihood (ML) trees are computed with kSNP. Although this is the `recommended` tree format to produce, you can specify the neighbor joining (NJ) method by including the `--NJ` option. Furthermore, you can enter a decimal number between 0 and 1 specifying the fraction of loci that must be present in all genomes to be included in the resulting SNP phylogeny. NB kSNP3 has certain input filename requirements e.g. a filename can only have one '.' (e.g. use reference_1.fasta instead of reference.1.fasta); otherwise the user will see error: kSNP3_results no such file or directory (check the Name errors file in the working directory for details)
 ```
 $ nextflow alignment.nf -profile alignment --read_pairs "tutorial/raw_sequence_data/*_R{1,2}_001.fq.gz" --NJ --min_frac 0.85
 ```
@@ -295,7 +319,8 @@ $ nextflow assembly.nf -profile assembly --read_pairs "tutorial/raw_sequence_dat
 
 Database Options
 ----------------
-To include an alternative `reference`, `virulence`, `plasmid`, or `resistance` database, you can do that as well.
+To include an alternative `reference`, `virulence`, `plasmid`, or `resistance` database, you can do that as well. NB these databases (amr_db, vf_db, plasmid_db) have to be in single line fasta format (as opposed to multiline fasta format) for csa to work (please convert first if necessary)
+
 ```
 $ nextflow alignment.nf -profile alignment --read_pairs "tutorial/raw_sequence_data/*_R{1,2}_001.fq.gz" --ref_db "path/to/your/reference/db/ref.fa" --vf_db "path/to/your/virulence/db/vf.fa" --plasmid_db "path/to/your/plasmid/db/plasmid.fa" --amr_db "path/to/your/resistance/db/resistance.fa"
 ```
@@ -340,6 +365,16 @@ PreProcessing | `Contains all FASTQ formatted trimmed sequence files produced by
 
 -------
 
+Results interpretation
+============
+
+Note that the results for aligning against VF, AMR and plasmid DBs are tsv files produced by CSA, the 5 columns are:
+Level: the sampling percent alignments were taken at
+Iteration: the ith iteration of the current sample level
+Gene Id: the reference sequence having a gene fraction greater than the threshold
+Gene Fraction: the number of bases covered by the sample of alignments
+Hits: the number of alignments that had bases cover the reference sequence
+
 Dependencies
 ============
 
@@ -367,6 +402,3 @@ Software | Function
 
 ------------
 
-Contact
-=======
-Questions, bugs, or feature requests should be directed to Chris Dean at cdean11 AT rams DOT colostate DOT edu. Alternatively, you can [Submit an Issue](https://github.com/cdeanj/nextflow-tychus/issues) on Github.
